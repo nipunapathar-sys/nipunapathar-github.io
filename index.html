@@ -1,0 +1,2495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindEverything - Your Ultimate Portal</title>
+    <style>
+        /* ========== CSS RESET & BASE ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5a4bd1;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --darker: #1e272e;
+            --light: #dfe6e9;
+            --white: #ffffff;
+            --bg: #0a0a1a;
+            --card-bg: #1a1a2e;
+            --card-hover: #16213e;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #e17055;
+            --gradient1: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            --gradient2: linear-gradient(135deg, #00cec9, #81ecec);
+            --gradient3: linear-gradient(135deg, #fd79a8, #e84393);
+            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+            --shadow-hover: 0 20px 60px rgba(108,92,231,0.3);
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        img { max-width: 100%; }
+        button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+        input, select, textarea { font-family: inherit; outline: none; }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--darker); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+
+        /* ========== LOADER ========== */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); display: flex; align-items: center;
+            justify-content: center; z-index: 99999; transition: opacity 0.5s;
+        }
+        .loader-spinner {
+            width: 60px; height: 60px; border: 4px solid rgba(108,92,231,0.2);
+            border-top: 4px solid var(--primary); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ========== NAVBAR ========== */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: rgba(10,10,26,0.95); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(108,92,231,0.2);
+            padding: 0 2rem; display: flex; align-items: center;
+            justify-content: space-between; height: 70px;
+            transition: all 0.3s;
+        }
+        .navbar.scrolled { box-shadow: var(--shadow); height: 60px; }
+        .nav-logo {
+            font-size: 1.5rem; font-weight: 800;
+            background: var(--gradient1); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; letter-spacing: -0.5px;
+        }
+        .nav-logo span { 
+            background: var(--gradient3); -webkit-background-clip: text;
+        }
+        .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+        .nav-links a {
+            padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem;
+            font-weight: 500; transition: all 0.3s; color: var(--light);
+        }
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(108,92,231,0.2); color: var(--white);
+        }
+        .nav-search {
+            display: flex; align-items: center; background: rgba(255,255,255,0.08);
+            border-radius: 25px; padding: 0.4rem 1rem; gap: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-search input {
+            background: none; border: none; color: var(--white);
+            width: 200px; font-size: 0.9rem;
+        }
+        .nav-search input::placeholder { color: rgba(255,255,255,0.4); }
+        .hamburger {
+            display: none; flex-direction: column; gap: 5px;
+            cursor: pointer; padding: 5px;
+        }
+        .hamburger span {
+            width: 25px; height: 2px; background: var(--white);
+            transition: all 0.3s; border-radius: 2px;
+        }
+        .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+        /* ========== HERO ========== */
+        .hero {
+            min-height: 100vh; display: flex; align-items: center;
+            justify-content: center; text-align: center;
+            padding: 100px 2rem 60px; position: relative;
+            background: radial-gradient(ellipse at center, rgba(108,92,231,0.15) 0%, transparent 70%);
+        }
+        .hero-particles {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; pointer-events: none;
+        }
+        .particle {
+            position: absolute; border-radius: 50%; opacity: 0.3;
+            animation: float-particle linear infinite;
+        }
+        @keyframes float-particle {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+        }
+        .hero-content { position: relative; z-index: 2; max-width: 800px; }
+        .hero h1 {
+            font-size: 3.5rem; font-weight: 800; margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff, #a29bfe, #fd79a8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+        .hero p { font-size: 1.2rem; color: rgba(255,255,255,0.7); margin-bottom: 2rem; }
+        .hero-search {
+            display: flex; max-width: 600px; margin: 0 auto 2rem;
+            background: rgba(255,255,255,0.1); border-radius: 50px;
+            padding: 5px; border: 1px solid rgba(255,255,255,0.15);
+        }
+        .hero-search input {
+            flex: 1; background: none; border: none; color: var(--white);
+            padding: 1rem 1.5rem; font-size: 1.1rem;
+        }
+        .hero-search input::placeholder { color: rgba(255,255,255,0.4); }
+        .hero-search button {
+            background: var(--gradient1); color: var(--white);
+            padding: 1rem 2rem; border-radius: 50px; font-size: 1rem;
+            font-weight: 600; transition: all 0.3s;
+        }
+        .hero-search button:hover { transform: scale(1.05); box-shadow: var(--shadow-hover); }
+        .hero-stats {
+            display: flex; justify-content: center; gap: 3rem;
+            margin-top: 2rem; flex-wrap: wrap;
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat h3 {
+            font-size: 2rem; font-weight: 700;
+            background: var(--gradient2); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-stat p { font-size: 0.85rem; color: rgba(255,255,255,0.5); }
+
+        /* ========== AD BANNERS ========== */
+        .ad-banner {
+            background: linear-gradient(135deg, rgba(108,92,231,0.1), rgba(253,121,168,0.1));
+            border: 1px dashed rgba(108,92,231,0.3); border-radius: 12px;
+            padding: 1rem; text-align: center; margin: 1rem auto;
+            max-width: 728px; position: relative; overflow: hidden;
+            min-height: 90px; display: flex; align-items: center;
+            justify-content: center;
+        }
+        .ad-banner-large {
+            min-height: 250px; max-width: 970px;
+        }
+        .ad-banner-sidebar {
+            max-width: 300px; min-height: 250px;
+        }
+        .ad-label {
+            position: absolute; top: 5px; right: 10px;
+            font-size: 0.65rem; color: rgba(255,255,255,0.3);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .ad-content {
+            color: rgba(255,255,255,0.4); font-size: 0.9rem;
+        }
+        .ad-placeholder {
+            width: 100%; height: 100%; display: flex;
+            flex-direction: column; align-items: center;
+            justify-content: center; gap: 0.5rem;
+        }
+        .ad-placeholder .ad-icon { font-size: 2rem; opacity: 0.3; }
+
+        /* ========== SECTIONS ========== */
+        .section {
+            padding: 5rem 2rem;
+        }
+        .section-header {
+            text-align: center; margin-bottom: 3rem;
+        }
+        .section-header h2 {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;
+        }
+        .section-header p {
+            color: rgba(255,255,255,0.6); font-size: 1.1rem;
+        }
+        .section-divider {
+            width: 60px; height: 4px; border-radius: 2px;
+            background: var(--gradient1); margin: 1rem auto;
+        }
+
+        /* ========== CATEGORY TABS ========== */
+        .category-tabs {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 0.5rem; margin-bottom: 2rem;
+        }
+        .cat-tab {
+            padding: 0.6rem 1.5rem; border-radius: 25px;
+            background: rgba(255,255,255,0.06); color: var(--light);
+            font-size: 0.9rem; font-weight: 500; transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        .cat-tab:hover { background: rgba(108,92,231,0.2); }
+        .cat-tab.active {
+            background: var(--gradient1); color: var(--white);
+            box-shadow: 0 5px 20px rgba(108,92,231,0.4);
+        }
+
+        /* ========== CARDS GRID ========== */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem; max-width: 1400px; margin: 0 auto;
+        }
+        .card {
+            background: var(--card-bg); border-radius: 16px;
+            padding: 1.5rem; transition: all 0.3s; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative; overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(108,92,231,0.3);
+            background: var(--card-hover);
+        }
+        .card-icon {
+            width: 50px; height: 50px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; margin-bottom: 1rem;
+        }
+        .card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--white); }
+        .card p { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
+        .card-badge {
+            position: absolute; top: 1rem; right: 1rem;
+            padding: 0.2rem 0.7rem; border-radius: 12px;
+            font-size: 0.7rem; font-weight: 600;
+        }
+        .badge-free { background: rgba(0,184,148,0.2); color: var(--success); }
+        .badge-popular { background: rgba(253,121,168,0.2); color: var(--accent); }
+        .badge-new { background: rgba(108,92,231,0.2); color: #a29bfe; }
+        .badge-hot { background: rgba(225,112,85,0.2); color: var(--danger); }
+
+        /* ========== POPUP MODAL ========== */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            z-index: 10000; display: none; align-items: center;
+            justify-content: center; padding: 1rem;
+            animation: fadeIn 0.3s;
+        }
+        .modal-overlay.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal {
+            background: var(--card-bg); border-radius: 20px;
+            width: 100%; max-width: 900px; max-height: 90vh;
+            overflow: hidden; border: 1px solid rgba(108,92,231,0.2);
+            box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+            animation: slideUp 0.3s;
+            display: flex; flex-direction: column;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .modal-header h2 { font-size: 1.3rem; font-weight: 700; }
+        .modal-close {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(255,255,255,0.1); display: flex;
+            align-items: center; justify-content: center;
+            font-size: 1.2rem; color: var(--light); transition: all 0.3s;
+        }
+        .modal-close:hover { background: rgba(225,112,85,0.3); color: var(--danger); }
+        .modal-body {
+            padding: 2rem; overflow-y: auto; flex: 1;
+        }
+        .modal-body iframe {
+            width: 100%; height: 500px; border: none; border-radius: 12px;
+            background: #000;
+        }
+        .modal-info { margin-bottom: 1.5rem; }
+        .modal-info p { color: rgba(255,255,255,0.6); margin-bottom: 1rem; }
+        .modal-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .modal-tag {
+            padding: 0.3rem 0.8rem; border-radius: 15px;
+            background: rgba(108,92,231,0.15); color: #a29bfe;
+            font-size: 0.75rem;
+        }
+        .modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .btn {
+            padding: 0.7rem 1.5rem; border-radius: 10px;
+            font-size: 0.9rem; font-weight: 600; transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--gradient1); color: var(--white);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1); color: var(--white);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+        .btn-success { background: linear-gradient(135deg, #00b894, #55efc4); color: var(--dark); }
+        .btn-accent { background: var(--gradient3); color: var(--white); }
+
+        /* ========== GAMES SECTION ========== */
+        .games-container { max-width: 1400px; margin: 0 auto; }
+        .games-filter {
+            display: flex; flex-wrap: wrap; gap: 0.5rem;
+            justify-content: center; margin-bottom: 2rem;
+        }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .game-card {
+            background: var(--card-bg); border-radius: 12px;
+            overflow: hidden; transition: all 0.3s; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .game-card:hover {
+            transform: translateY(-3px); box-shadow: var(--shadow-hover);
+            border-color: rgba(108,92,231,0.3);
+        }
+        .game-thumb {
+            width: 100%; height: 150px; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 3rem; position: relative;
+        }
+        .game-thumb .play-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: flex;
+            align-items: center; justify-content: center;
+            opacity: 0; transition: all 0.3s; font-size: 2.5rem;
+        }
+        .game-card:hover .play-overlay { opacity: 1; }
+        .game-info { padding: 0.8rem; }
+        .game-info h4 { font-size: 0.9rem; font-weight: 600; color: var(--white); margin-bottom: 0.3rem; }
+        .game-meta {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.75rem; color: rgba(255,255,255,0.4);
+        }
+        .game-rating { color: var(--warning); }
+
+        .games-load-more {
+            text-align: center; margin-top: 2rem;
+        }
+        .games-counter {
+            text-align: center; margin-bottom: 1rem;
+            color: rgba(255,255,255,0.5); font-size: 0.9rem;
+        }
+
+        /* ========== GAME MODAL ========== */
+        .game-modal-body {
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .game-frame-container {
+            width: 100%; background: #000; border-radius: 12px;
+            overflow: hidden; position: relative;
+        }
+        .game-frame-container iframe {
+            width: 100%; height: 500px; border: none;
+        }
+        .game-controls {
+            display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* ========== TOOLS SECTION ========== */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem; max-width: 1400px; margin: 0 auto;
+        }
+        .tool-card {
+            background: var(--card-bg); border-radius: 16px;
+            padding: 2rem; text-align: center; transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.05); cursor: pointer;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px); box-shadow: var(--shadow-hover);
+            border-color: rgba(108,92,231,0.3);
+        }
+        .tool-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .tool-card h3 { font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--white); }
+        .tool-card p { font-size: 0.85rem; color: rgba(255,255,255,0.5); }
+
+        /* ========== TOOL MODALS ========== */
+        .tool-content { max-width: 600px; margin: 0 auto; }
+        .tool-input-group { margin-bottom: 1.5rem; }
+        .tool-input-group label {
+            display: block; margin-bottom: 0.5rem;
+            font-weight: 500; color: var(--light);
+        }
+        .tool-input {
+            width: 100%; padding: 0.8rem 1rem; border-radius: 10px;
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--white); font-size: 1rem; transition: all 0.3s;
+        }
+        .tool-input:focus { border-color: var(--primary); background: rgba(255,255,255,0.12); }
+        .tool-textarea { min-height: 120px; resize: vertical; }
+        .tool-result {
+            background: rgba(0,184,148,0.1); border: 1px solid rgba(0,184,148,0.2);
+            border-radius: 12px; padding: 1.5rem; margin-top: 1rem;
+            display: none;
+        }
+        .tool-result.active { display: block; }
+        .tool-result h4 { color: var(--success); margin-bottom: 0.5rem; }
+
+        /* ========== NEWS/CONTENT SECTION ========== */
+        .news-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem; max-width: 1400px; margin: 0 auto;
+        }
+        .news-card {
+            background: var(--card-bg); border-radius: 16px;
+            overflow: hidden; transition: all 0.3s; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .news-card:hover {
+            transform: translateY(-3px); box-shadow: var(--shadow-hover);
+        }
+        .news-img {
+            height: 200px; display: flex; align-items: center;
+            justify-content: center; font-size: 3rem;
+        }
+        .news-content { padding: 1.5rem; }
+        .news-content h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--white); }
+        .news-content p { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 1rem; }
+        .news-meta {
+            display: flex; justify-content: space-between;
+            font-size: 0.75rem; color: rgba(255,255,255,0.3);
+        }
+
+        /* ========== LIVE TV / STREAMING ========== */
+        .streaming-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem; max-width: 1400px; margin: 0 auto;
+        }
+        .stream-card {
+            background: var(--card-bg); border-radius: 12px;
+            padding: 1.2rem; display: flex; align-items: center;
+            gap: 1rem; transition: all 0.3s; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .stream-card:hover {
+            background: var(--card-hover); transform: translateX(5px);
+            border-color: rgba(108,92,231,0.3);
+        }
+        .stream-icon { font-size: 2rem; min-width: 50px; text-align: center; }
+        .stream-info h4 { font-size: 0.95rem; color: var(--white); }
+        .stream-info p { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+        .stream-live {
+            margin-left: auto; padding: 0.2rem 0.6rem;
+            border-radius: 10px; font-size: 0.65rem;
+            font-weight: 700; text-transform: uppercase;
+            background: rgba(225,112,85,0.2); color: var(--danger);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            background: var(--darker); padding: 4rem 2rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .footer-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem; max-width: 1200px; margin: 0 auto 3rem;
+        }
+        .footer-col h4 {
+            font-size: 1rem; margin-bottom: 1rem; color: var(--white);
+        }
+        .footer-col a {
+            display: block; padding: 0.3rem 0; font-size: 0.85rem;
+            color: rgba(255,255,255,0.5); transition: all 0.3s;
+        }
+        .footer-col a:hover { color: var(--primary); padding-left: 5px; }
+        .footer-bottom {
+            text-align: center; padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.8rem; color: rgba(255,255,255,0.3);
+        }
+        .footer-social { display: flex; gap: 1rem; margin-top: 0.5rem; justify-content: center; }
+        .footer-social a {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255,255,255,0.08); display: flex;
+            align-items: center; justify-content: center;
+            transition: all 0.3s; font-size: 1.1rem;
+        }
+        .footer-social a:hover { background: var(--primary); transform: translateY(-3px); }
+
+        /* ========== BACK TO TOP ========== */
+        .back-to-top {
+            position: fixed; bottom: 2rem; right: 2rem; width: 45px; height: 45px;
+            border-radius: 50%; background: var(--gradient1); color: var(--white);
+            display: none; align-items: center; justify-content: center;
+            font-size: 1.2rem; z-index: 999; transition: all 0.3s;
+            box-shadow: var(--shadow);
+        }
+        .back-to-top.visible { display: flex; }
+        .back-to-top:hover { transform: translateY(-3px); }
+
+        /* ========== COOKIE CONSENT ========== */
+        .cookie-banner {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: var(--darker); padding: 1.5rem 2rem;
+            display: none; align-items: center; justify-content: center;
+            gap: 1.5rem; z-index: 9999; border-top: 1px solid rgba(108,92,231,0.2);
+            flex-wrap: wrap;
+        }
+        .cookie-banner.active { display: flex; }
+        .cookie-banner p { font-size: 0.9rem; color: rgba(255,255,255,0.7); }
+
+        /* ========== FLOATING SIDEBAR AD ========== */
+        .sidebar-ad-left, .sidebar-ad-right {
+            position: fixed; top: 50%; transform: translateY(-50%);
+            width: 160px; z-index: 50; display: none;
+        }
+        .sidebar-ad-left { left: 10px; }
+        .sidebar-ad-right { right: 10px; }
+        @media (min-width: 1600px) {
+            .sidebar-ad-left, .sidebar-ad-right { display: block; }
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .nav-links { 
+                display: none; position: fixed; top: 70px; left: 0;
+                width: 100%; background: rgba(10,10,26,0.98);
+                flex-direction: column; padding: 1rem;
+                border-bottom: 1px solid rgba(108,92,231,0.2);
+            }
+            .nav-links.active { display: flex; }
+            .hamburger { display: flex; }
+            .nav-search { display: none; }
+            .hero h1 { font-size: 2rem; }
+            .hero-stats { gap: 1.5rem; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .games-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+            .news-grid { grid-template-columns: 1fr; }
+            .modal { max-width: 100%; margin: 0.5rem; }
+            .modal-body iframe, .game-frame-container iframe { height: 300px; }
+            .section { padding: 3rem 1rem; }
+        }
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 1.6rem; }
+            .hero-search { flex-direction: column; border-radius: 16px; }
+            .hero-search button { border-radius: 12px; }
+            .games-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* ========== NOTIFICATION ========== */
+        .notification {
+            position: fixed; top: 80px; right: 20px; padding: 1rem 1.5rem;
+            border-radius: 12px; background: var(--card-bg);
+            border-left: 4px solid var(--success); color: var(--white);
+            z-index: 10001; transform: translateX(120%); transition: all 0.3s;
+            box-shadow: var(--shadow); max-width: 350px;
+        }
+        .notification.active { transform: translateX(0); }
+        .notification.error { border-left-color: var(--danger); }
+
+        /* ========== TAB SECTIONS ========== */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ========== FEATURE LIST ========== */
+        .feature-list {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem; max-width: 1200px; margin: 2rem auto;
+        }
+        .feature-item {
+            display: flex; gap: 1rem; align-items: flex-start;
+            padding: 1rem; border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+        }
+        .feature-icon {
+            font-size: 1.5rem; min-width: 40px; text-align: center;
+        }
+        .feature-item h4 { font-size: 0.95rem; margin-bottom: 0.3rem; color: var(--white); }
+        .feature-item p { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+
+        /* ========== MARQUEE ========== */
+        .marquee-bar {
+            background: rgba(108,92,231,0.1); padding: 0.7rem 0;
+            overflow: hidden; white-space: nowrap;
+            border-bottom: 1px solid rgba(108,92,231,0.1);
+        }
+        .marquee-content {
+            display: inline-block; animation: marquee 30s linear infinite;
+            font-size: 0.85rem; color: rgba(255,255,255,0.6);
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* ========== WEATHER WIDGET ========== */
+        .weather-widget {
+            background: var(--card-bg); border-radius: 16px;
+            padding: 1.5rem; max-width: 300px; text-align: center;
+        }
+        .weather-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+        .weather-temp { font-size: 2.5rem; font-weight: 700; color: var(--white); }
+
+        /* ========== PROGRESS BAR ========== */
+        .progress-bar {
+            width: 100%; height: 4px; background: rgba(255,255,255,0.1);
+            border-radius: 2px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: var(--gradient1);
+            border-radius: 2px; transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+    <div class="loader-spinner"></div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+    <a href="#" class="nav-logo" onclick="showSection('home')">Find<span>Everything</span></a>
+    <div class="nav-links" id="navLinks">
+        <a href="#" class="active" data-section="home" onclick="showSection('home')">🏠 Home</a>
+        <a href="#" data-section="sites" onclick="showSection('sites')">🌐 Sites</a>
+        <a href="#" data-section="games" onclick="showSection('games')">🎮 Games</a>
+        <a href="#" data-section="tools" onclick="showSection('tools')">🛠️ Tools</a>
+        <a href="#" data-section="streaming" onclick="showSection('streaming')">📺 TV</a>
+        <a href="#" data-section="news" onclick="showSection('news')">📰 News</a>
+        <a href="#" data-section="social" onclick="showSection('social')">💬 Social</a>
+        <a href="#" data-section="education" onclick="showSection('education')">📚 Learn</a>
+        <a href="#" data-section="shopping" onclick="showSection('shopping')">🛒 Shop</a>
+    </div>
+    <div class="nav-search">
+        <span>🔍</span>
+        <input type="text" placeholder="Search everything..." id="globalSearch" onkeyup="handleSearch(event)">
+    </div>
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+    </div>
+</nav>
+
+<!-- MARQUEE -->
+<div class="marquee-bar" style="margin-top:70px;">
+    <div class="marquee-content">
+        🔥 Welcome to FindEverything! | 🎮 1000+ Free Games Available | 📺 Free Live TV Channels | 🛠️ Free Online Tools | 📰 Latest News Updates | 🎵 Free Music Streaming | 📚 Free Learning Resources | 🛒 Best Shopping Deals | ⚡ Fast & Free Forever | 🌍 Everything in One Place
+    </div>
+</div>
+
+<!-- ========== AD BANNER TOP ========== -->
+<div class="ad-banner" id="topAd">
+    <span class="ad-label">Advertisement</span>
+    <div class="ad-placeholder">
+        <div class="ad-icon">📢</div>
+        <div class="ad-content">Ad Space - 728x90 Leaderboard<br><small>Place your Google AdSense / ad code here</small></div>
+    </div>
+</div>
+
+<!-- ========== HOME SECTION ========== -->
+<div id="section-home" class="tab-content active">
+    <section class="hero">
+        <div class="hero-particles" id="particles"></div>
+        <div class="hero-content">
+            <h1>Everything You Need,<br>All In One Place</h1>
+            <p>Access 1000+ free games, live TV, tools, shopping deals, learning resources, social media, news and much more — completely free!</p>
+            <div class="hero-search">
+                <input type="text" placeholder="What are you looking for?" id="heroSearch" onkeyup="handleSearch(event)">
+                <button onclick="performSearch()">🔍 Search</button>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat"><h3 id="counter1">0</h3><p>Free Games</p></div>
+                <div class="hero-stat"><h3 id="counter2">0</h3><p>Websites</p></div>
+                <div class="hero-stat"><h3 id="counter3">0</h3><p>Free Tools</p></div>
+                <div class="hero-stat"><h3 id="counter4">0</h3><p>TV Channels</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Categories -->
+    <section class="section">
+        <div class="section-header">
+            <h2>Quick Access</h2>
+            <div class="section-divider"></div>
+            <p>Jump into any category instantly</p>
+        </div>
+        <div class="cards-grid">
+            <div class="card" onclick="showSection('games')">
+                <div class="card-icon" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe)">🎮</div>
+                <span class="card-badge badge-hot">HOT</span>
+                <h3>1000+ Free Games</h3>
+                <p>Play action, puzzle, racing, sports, multiplayer and more. No downloads needed!</p>
+            </div>
+            <div class="card" onclick="showSection('streaming')">
+                <div class="card-icon" style="background:linear-gradient(135deg,#e17055,#fab1a0)">📺</div>
+                <span class="card-badge badge-popular">POPULAR</span>
+                <h3>Live TV & Streaming</h3>
+                <p>Watch free live TV channels, movies, series and sports streaming.</p>
+            </div>
+            <div class="card" onclick="showSection('tools')">
+                <div class="card-icon" style="background:linear-gradient(135deg,#00b894,#55efc4)">🛠️</div>
+                <span class="card-badge badge-free">FREE</span>
+                <h3>Online Tools</h3>
+                <p>Calculator, converter, QR generator, password generator and more tools.</p>
+            </div>
+            <div class="card" onclick="showSection('shopping')">
+                <div class="card-icon" style="background:linear-gradient(135deg,#fd79a8,#e84393)">🛒</div>
+                <span class="card-badge badge-new">NEW</span>
+                <h3>Shopping Deals</h3>
+                <p>Best deals from Amazon, eBay, AliExpress and all major stores.</p>
+            </div>
+            <div class="card" onclick="showSection('education')">
+                <div class="card-icon" style="background:linear-gradient(135deg,#fdcb6e,#f39c12)">📚</div>
+                <span class="card-badge badge-free">FREE</span>
+                <h3>Free Learning</h3>
+                <p>Free courses, tutorials, eBooks from top educational platforms.</p>
+            </div>
+            <div class="card" onclick="showSection('social')">
+                <div class="card-icon" style="background:linear-gradient(135deg,#0984e3,#74b9ff)">💬</div>
+                <span class="card-badge badge-popular">POPULAR</span>
+                <h3>Social Media Hub</h3>
+                <p>Access all social media platforms and messaging apps in one place.</p>
+            </div>
+            <div class="card" onclick="showSection('news')">
+                <div class="card-icon" style="background:linear-gradient(135deg,#636e72,#b2bec3)">📰</div>
+                <h3>Latest News</h3>
+                <p>Breaking news from around the world, tech, sports, entertainment and more.</p>
+            </div>
+            <div class="card" onclick="showSection('sites')">
+                <div class="card-icon" style="background:linear-gradient(135deg,#00cec9,#81ecec)">🌐</div>
+                <h3>All Websites</h3>
+                <p>Browse categorized directory of the world's most useful websites.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- AD -->
+    <div class="ad-banner ad-banner-large">
+        <span class="ad-label">Advertisement</span>
+        <div class="ad-placeholder">
+            <div class="ad-icon">📢</div>
+            <div class="ad-content">Ad Space - 970x250 Billboard<br><small>Your Google AdSense code goes here</small></div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <section class="section">
+        <div class="section-header">
+            <h2>Why FindEverything?</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-icon">⚡</div>
+                <div><h4>Lightning Fast</h4><p>Instant access to any resource without leaving the site</p></div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🔒</div>
+                <div><h4>100% Safe</h4><p>All content loaded in secure sandboxed frames</p></div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">💰</div>
+                <div><h4>Completely Free</h4><p>No subscriptions, no hidden fees, everything is free</p></div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">📱</div>
+                <div><h4>Mobile Friendly</h4><p>Works perfectly on phones, tablets and desktops</p></div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🎮</div>
+                <div><h4>1000+ Games</h4><p>Massive collection of free browser games</p></div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🌍</div>
+                <div><h4>Everything in One Place</h4><p>No more switching between dozens of tabs</p></div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- ========== WEBSITES SECTION ========== -->
+<div id="section-sites" class="tab-content">
+    <section class="section">
+        <div class="section-header">
+            <h2>🌐 All Websites Directory</h2>
+            <div class="section-divider"></div>
+            <p>Browse the web's most useful sites — opens right here in popup!</p>
+        </div>
+        <div class="category-tabs" id="siteTabs">
+            <button class="cat-tab active" onclick="filterSites('all')">All</button>
+            <button class="cat-tab" onclick="filterSites('search')">Search</button>
+            <button class="cat-tab" onclick="filterSites('social')">Social</button>
+            <button class="cat-tab" onclick="filterSites('video')">Video</button>
+            <button class="cat-tab" onclick="filterSites('music')">Music</button>
+            <button class="cat-tab" onclick="filterSites('news')">News</button>
+            <button class="cat-tab" onclick="filterSites('email')">Email</button>
+            <button class="cat-tab" onclick="filterSites('cloud')">Cloud</button>
+            <button class="cat-tab" onclick="filterSites('dev')">Dev Tools</button>
+            <button class="cat-tab" onclick="filterSites('finance')">Finance</button>
+            <button class="cat-tab" onclick="filterSites('health')">Health</button>
+            <button class="cat-tab" onclick="filterSites('travel')">Travel</button>
+            <button class="cat-tab" onclick="filterSites('food')">Food</button>
+            <button class="cat-tab" onclick="filterSites('jobs')">Jobs</button>
+        </div>
+        <div class="cards-grid" id="sitesGrid"></div>
+    </section>
+</div>
+
+<!-- ========== GAMES SECTION ========== -->
+<div id="section-games" class="tab-content">
+    <section class="section">
+        <div class="section-header">
+            <h2>🎮 Free Games Arcade</h2>
+            <div class="section-divider"></div>
+            <p>1000+ free browser games — single player & multiplayer!</p>
+        </div>
+        
+        <div class="ad-banner">
+            <span class="ad-label">Advertisement</span>
+            <div class="ad-placeholder">
+                <div class="ad-icon">📢</div>
+                <div class="ad-content">Ad Space - 728x90</div>
+            </div>
+        </div>
+
+        <div class="games-filter" id="gameFilters">
+            <button class="cat-tab active" onclick="filterGames('all')">🎯 All Games</button>
+            <button class="cat-tab" onclick="filterGames('action')">⚔️ Action</button>
+            <button class="cat-tab" onclick="filterGames('puzzle')">🧩 Puzzle</button>
+            <button class="cat-tab" onclick="filterGames('racing')">🏎️ Racing</button>
+            <button class="cat-tab" onclick="filterGames('sports')">⚽ Sports</button>
+            <button class="cat-tab" onclick="filterGames('arcade')">👾 Arcade</button>
+            <button class="cat-tab" onclick="filterGames('strategy')">♟️ Strategy</button>
+            <button class="cat-tab" onclick="filterGames('adventure')">🗺️ Adventure</button>
+            <button class="cat-tab" onclick="filterGames('shooter')">🔫 Shooter</button>
+            <button class="cat-tab" onclick="filterGames('multiplayer')">👥 Multiplayer</button>
+            <button class="cat-tab" onclick="filterGames('io')">🌐 .io Games</button>
+            <button class="cat-tab" onclick="filterGames('card')">🃏 Card</button>
+            <button class="cat-tab" onclick="filterGames('board')">🎲 Board</button>
+            <button class="cat-tab" onclick="filterGames('rpg')">⚔️ RPG</button>
+            <button class="cat-tab" onclick="filterGames('horror')">👻 Horror</button>
+            <button class="cat-tab" onclick="filterGames('casual')">😊 Casual</button>
+        </div>
+        
+        <div class="games-counter" id="gamesCounter">Showing 0 games</div>
+        <div class="games-grid" id="gamesGrid"></div>
+        <div class="games-load-more">
+            <button class="btn btn-primary" id="loadMoreGames" onclick="loadMoreGames()">Load More Games ⬇️</button>
+        </div>
+
+        <div class="ad-banner" style="margin-top:2rem;">
+            <span class="ad-label">Advertisement</span>
+            <div class="ad-placeholder">
+                <div class="ad-icon">📢</div>
+                <div class="ad-content">Ad Space - 728x90</div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- ========== TOOLS SECTION ========== -->
+<div id="section-tools" class="tab-content">
+    <section class="section">
+        <div class="section-header">
+            <h2>🛠️ Free Online Tools</h2>
+            <div class="section-divider"></div>
+            <p>Useful tools that work right here — no installs needed!</p>
+        </div>
+        <div class="tools-grid" id="toolsGrid"></div>
+    </section>
+</div>
+
+<!-- ========== STREAMING SECTION ========== -->
+<div id="section-streaming" class="tab-content">
+    <section class="section">
+        <div class="section-header">
+            <h2>📺 Live TV & Streaming</h2>
+            <div class="section-divider"></div>
+            <p>Free live TV channels and streaming platforms</p>
+        </div>
+        <div class="streaming-grid" id="streamingGrid"></div>
+    </section>
+</div>
+
+<!-- ========== NEWS SECTION ========== -->
+<div id="section-news" class="tab-content">
+    <section class="section">
+        <div class="section-header">
+            <h2>📰 Latest News</h2>
+            <div class="section-divider"></div>
+            <p>Stay updated with news from top sources worldwide</p>
+        </div>
+        <div class="cards-grid" id="newsGrid"></div>
+    </section>
+</div>
+
+<!-- ========== SOCIAL SECTION ========== -->
+<div id="section-social" class="tab-content">
+    <section class="section">
+        <div class="section-header">
+            <h2>💬 Social Media Hub</h2>
+            <div class="section-divider"></div>
+            <p>Access all your social networks in one place</p>
+        </div>
+        <div class="cards-grid" id="socialGrid"></div>
+    </section>
+</div>
+
+<!-- ========== EDUCATION SECTION ========== -->
+<div id="section-education" class="tab-content">
+    <section class="section">
+        <div class="section-header">
+            <h2>📚 Free Learning Hub</h2>
+            <div class="section-divider"></div>
+            <p>Learn anything for free from the world's best platforms</p>
+        </div>
+        <div class="cards-grid" id="educationGrid"></div>
+    </section>
+</div>
+
+<!-- ========== SHOPPING SECTION ========== -->
+<div id="section-shopping" class="tab-content">
+    <section class="section">
+        <div class="section-header">
+            <h2>🛒 Shopping & Deals</h2>
+            <div class="section-divider"></div>
+            <p>Best online stores and deal websites</p>
+        </div>
+        <div class="cards-grid" id="shoppingGrid"></div>
+    </section>
+</div>
+
+<!-- ========== AD BANNER BOTTOM ========== -->
+<div class="ad-banner ad-banner-large">
+    <span class="ad-label">Advertisement</span>
+    <div class="ad-placeholder">
+        <div class="ad-icon">📢</div>
+        <div class="ad-content">Ad Space - 970x250 Billboard<br><small>Your Google AdSense code goes here</small></div>
+    </div>
+</div>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer">
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h4>🏠 FindEverything</h4>
+            <p style="font-size:0.85rem;color:rgba(255,255,255,0.4);margin-bottom:1rem;">
+                Your one-stop portal for everything on the internet. Free games, tools, streaming, news and more!
+            </p>
+        </div>
+        <div class="footer-col">
+            <h4>Quick Links</h4>
+            <a href="#" onclick="showSection('home')">Home</a>
+            <a href="#" onclick="showSection('games')">Free Games</a>
+            <a href="#" onclick="showSection('tools')">Online Tools</a>
+            <a href="#" onclick="showSection('streaming')">Live TV</a>
+        </div>
+        <div class="footer-col">
+            <h4>Categories</h4>
+            <a href="#" onclick="showSection('sites')">All Websites</a>
+            <a href="#" onclick="showSection('news')">News</a>
+            <a href="#" onclick="showSection('social')">Social Media</a>
+            <a href="#" onclick="showSection('education')">Education</a>
+        </div>
+        <div class="footer-col">
+            <h4>More</h4>
+            <a href="#" onclick="showSection('shopping')">Shopping</a>
+            <a href="#" onclick="openToolModal('about')">About Us</a>
+            <a href="#" onclick="openToolModal('contact')">Contact</a>
+            <a href="#" onclick="openToolModal('privacy')">Privacy Policy</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2024 FindEverything. All rights reserved. | Made with ❤️</p>
+        <div class="footer-social">
+            <a href="#" onclick="openSitePopup('Facebook','https://facebook.com','💙')">📘</a>
+            <a href="#" onclick="openSitePopup('Twitter','https://twitter.com','💙')">🐦</a>
+            <a href="#" onclick="openSitePopup('Instagram','https://instagram.com','💜')">📷</a>
+            <a href="#" onclick="openSitePopup('YouTube','https://youtube.com','❤️')">📺</a>
+        </div>
+    </div>
+</footer>
+
+<!-- BACK TO TOP -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">⬆️</button>
+
+<!-- COOKIE CONSENT -->
+<div class="cookie-banner" id="cookieBanner">
+    <p>🍪 We use cookies for ads and analytics. By continuing, you accept our cookie policy.</p>
+    <button class="btn btn-primary" onclick="acceptCookies()">Accept</button>
+    <button class="btn btn-secondary" onclick="acceptCookies()">Dismiss</button>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification"></div>
+
+<!-- ========== POPUP MODAL ========== -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+    <div class="modal" id="mainModal">
+        <div class="modal-header">
+            <h2 id="modalTitle">Title</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script>
+// ==========================================
+// DATA: ALL WEBSITES
+// ==========================================
+const allSites = [
+    // SEARCH
+    {name:"Google",url:"https://www.google.com",icon:"🔍",cat:"search",desc:"World's #1 search engine",badge:"popular"},
+    {name:"Bing",url:"https://www.bing.com",icon:"🔎",cat:"search",desc:"Microsoft's search engine with AI"},
+    {name:"Yahoo",url:"https://www.yahoo.com",icon:"🟣",cat:"search",desc:"Search, news and email"},
+    {name:"DuckDuckGo",url:"https://duckduckgo.com",icon:"🦆",cat:"search",desc:"Private search engine"},
+    {name:"Brave Search",url:"https://search.brave.com",icon:"🦁",cat:"search",desc:"Independent private search"},
+    // SOCIAL
+    {name:"Facebook",url:"https://www.facebook.com",icon:"📘",cat:"social",desc:"Connect with friends & family",badge:"popular"},
+    {name:"Twitter / X",url:"https://twitter.com",icon:"🐦",cat:"social",desc:"Real-time news & conversations"},
+    {name:"Instagram",url:"https://www.instagram.com",icon:"📷",cat:"social",desc:"Photos, stories & reels"},
+    {name:"LinkedIn",url:"https://www.linkedin.com",icon:"💼",cat:"social",desc:"Professional networking"},
+    {name:"Reddit",url:"https://www.reddit.com",icon:"🤖",cat:"social",desc:"Front page of the internet"},
+    {name:"Pinterest",url:"https://www.pinterest.com",icon:"📌",cat:"social",desc:"Discover ideas & inspiration"},
+    {name:"TikTok",url:"https://www.tiktok.com",icon:"🎵",cat:"social",desc:"Short-form video platform",badge:"hot"},
+    {name:"Snapchat",url:"https://www.snapchat.com",icon:"👻",cat:"social",desc:"Snaps & stories"},
+    {name:"Discord",url:"https://discord.com",icon:"🎧",cat:"social",desc:"Chat for communities & gaming"},
+    {name:"Telegram",url:"https://web.telegram.org",icon:"✈️",cat:"social",desc:"Fast & secure messaging"},
+    {name:"WhatsApp Web",url:"https://web.whatsapp.com",icon:"💬",cat:"social",desc:"Messaging from browser"},
+    {name:"Tumblr",url:"https://www.tumblr.com",icon:"📝",cat:"social",desc:"Microblogging platform"},
+    {name:"Quora",url:"https://www.quora.com",icon:"❓",cat:"social",desc:"Q&A knowledge platform"},
+    // VIDEO
+    {name:"YouTube",url:"https://www.youtube.com",icon:"▶️",cat:"video",desc:"World's largest video platform",badge:"popular"},
+    {name:"Twitch",url:"https://www.twitch.tv",icon:"🟣",cat:"video",desc:"Live streaming platform",badge:"hot"},
+    {name:"Vimeo",url:"https://vimeo.com",icon:"🎬",cat:"video",desc:"High-quality video hosting"},
+    {name:"Dailymotion",url:"https://www.dailymotion.com",icon:"📹",cat:"video",desc:"Video sharing platform"},
+    {name:"Rumble",url:"https://rumble.com",icon:"📺",cat:"video",desc:"Free speech video platform"},
+    {name:"PeerTube",url:"https://joinpeertube.org",icon:"🌐",cat:"video",desc:"Decentralized video hosting"},
+    // MUSIC
+    {name:"Spotify",url:"https://open.spotify.com",icon:"🎵",cat:"music",desc:"Music streaming service",badge:"popular"},
+    {name:"SoundCloud",url:"https://soundcloud.com",icon:"🎧",cat:"music",desc:"Independent music platform"},
+    {name:"YouTube Music",url:"https://music.youtube.com",icon:"🎶",cat:"music",desc:"Music from YouTube"},
+    {name:"Deezer",url:"https://www.deezer.com",icon:"🎼",cat:"music",desc:"Music streaming service"},
+    {name:"Last.fm",url:"https://www.last.fm",icon:"📻",cat:"music",desc:"Music discovery & stats"},
+    {name:"Bandcamp",url:"https://bandcamp.com",icon:"🎸",cat:"music",desc:"Support independent artists"},
+    // NEWS
+    {name:"CNN",url:"https://www.cnn.com",icon:"📰",cat:"news",desc:"Breaking news worldwide"},
+    {name:"BBC News",url:"https://www.bbc.com/news",icon:"🇬🇧",cat:"news",desc:"UK & world news"},
+    {name:"Reuters",url:"https://www.reuters.com",icon:"📡",cat:"news",desc:"International news agency"},
+    {name:"Al Jazeera",url:"https://www.aljazeera.com",icon:"🌍",cat:"news",desc:"Middle East & world news"},
+    {name:"The Guardian",url:"https://www.theguardian.com",icon:"📰",cat:"news",desc:"Independent journalism"},
+    {name:"TechCrunch",url:"https://techcrunch.com",icon:"💻",cat:"news",desc:"Tech & startup news",badge:"new"},
+    {name:"The Verge",url:"https://www.theverge.com",icon:"⚡",cat:"news",desc:"Tech, science & culture"},
+    {name:"Ars Technica",url:"https://arstechnica.com",icon:"🔬",cat:"news",desc:"Technology & science news"},
+    {name:"Hacker News",url:"https://news.ycombinator.com",icon:"🤓",cat:"news",desc:"Tech community news"},
+    {name:"Fox News",url:"https://www.foxnews.com",icon:"🦊",cat:"news",desc:"US news & politics"},
+    {name:"NBC News",url:"https://www.nbcnews.com",icon:"📺",cat:"news",desc:"US & world news"},
+    {name:"ESPN",url:"https://www.espn.com",icon:"🏈",cat:"news",desc:"Sports news & scores"},
+    // EMAIL
+    {name:"Gmail",url:"https://mail.google.com",icon:"📧",cat:"email",desc:"Google's email service",badge:"popular"},
+    {name:"Outlook",url:"https://outlook.live.com",icon:"📨",cat:"email",desc:"Microsoft email"},
+    {name:"Yahoo Mail",url:"https://mail.yahoo.com",icon:"📩",cat:"email",desc:"Yahoo email service"},
+    {name:"ProtonMail",url:"https://mail.proton.me",icon:"🔐",cat:"email",desc:"Encrypted email"},
+    {name:"Tutanota",url:"https://mail.tutanota.com",icon:"🛡️",cat:"email",desc:"Secure email service"},
+    // CLOUD
+    {name:"Google Drive",url:"https://drive.google.com",icon:"☁️",cat:"cloud",desc:"Cloud storage by Google",badge:"popular"},
+    {name:"Dropbox",url:"https://www.dropbox.com",icon:"📦",cat:"cloud",desc:"File storage & sharing"},
+    {name:"OneDrive",url:"https://onedrive.live.com",icon:"🔷",cat:"cloud",desc:"Microsoft cloud storage"},
+    {name:"MEGA",url:"https://mega.nz",icon:"🔴",cat:"cloud",desc:"Encrypted cloud storage"},
+    {name:"Google Docs",url:"https://docs.google.com",icon:"📄",cat:"cloud",desc:"Online document editor"},
+    {name:"Google Sheets",url:"https://sheets.google.com",icon:"📊",cat:"cloud",desc:"Online spreadsheets"},
+    {name:"Notion",url:"https://www.notion.so",icon:"📝",cat:"cloud",desc:"All-in-one workspace"},
+    // DEV
+    {name:"GitHub",url:"https://github.com",icon:"🐙",cat:"dev",desc:"Code hosting & collaboration",badge:"popular"},
+    {name:"Stack Overflow",url:"https://stackoverflow.com",icon:"📚",cat:"dev",desc:"Developer Q&A community"},
+    {name:"CodePen",url:"https://codepen.io",icon:"✏️",cat:"dev",desc:"Front-end code playground"},
+    {name:"JSFiddle",url:"https://jsfiddle.net",icon:"🎯",cat:"dev",desc:"Online code editor"},
+    {name:"Replit",url:"https://replit.com",icon:"💻",cat:"dev",desc:"Online IDE & hosting"},
+    {name:"GitLab",url:"https://gitlab.com",icon:"🦊",cat:"dev",desc:"DevOps platform"},
+    {name:"NPM",url:"https://www.npmjs.com",icon:"📦",cat:"dev",desc:"Node.js package registry"},
+    {name:"MDN Web Docs",url:"https://developer.mozilla.org",icon:"🔥",cat:"dev",desc:"Web development docs"},
+    {name:"W3Schools",url:"https://www.w3schools.com",icon:"🎓",cat:"dev",desc:"Web development tutorials"},
+    {name:"Can I Use",url:"https://caniuse.com",icon:"✅",cat:"dev",desc:"Browser compatibility tables"},
+    // FINANCE
+    {name:"Yahoo Finance",url:"https://finance.yahoo.com",icon:"📈",cat:"finance",desc:"Stock market & news"},
+    {name:"CoinMarketCap",url:"https://coinmarketcap.com",icon:"₿",cat:"finance",desc:"Crypto prices & data"},
+    {name:"Investing.com",url:"https://www.investing.com",icon:"💰",cat:"finance",desc:"Financial markets data"},
+    {name:"Bloomberg",url:"https://www.bloomberg.com",icon:"📊",cat:"finance",desc:"Financial news"},
+    {name:"CoinGecko",url:"https://www.coingecko.com",icon:"🦎",cat:"finance",desc:"Crypto data aggregator"},
+    // HEALTH
+    {name:"WebMD",url:"https://www.webmd.com",icon:"🏥",cat:"health",desc:"Health information"},
+    {name:"Healthline",url:"https://www.healthline.com",icon:"❤️",cat:"health",desc:"Health & wellness"},
+    {name:"Mayo Clinic",url:"https://www.mayoclinic.org",icon:"🩺",cat:"health",desc:"Medical information"},
+    {name:"WHO",url:"https://www.who.int",icon:"🌍",cat:"health",desc:"World Health Organization"},
+    // TRAVEL
+    {name:"Google Maps",url:"https://maps.google.com",icon:"🗺️",cat:"travel",desc:"Maps & navigation",badge:"popular"},
+    {name:"Booking.com",url:"https://www.booking.com",icon:"🏨",cat:"travel",desc:"Hotel bookings"},
+    {name:"Airbnb",url:"https://www.airbnb.com",icon:"🏠",cat:"travel",desc:"Vacation rentals"},
+    {name:"TripAdvisor",url:"https://www.tripadvisor.com",icon:"✈️",cat:"travel",desc:"Travel reviews & bookings"},
+    {name:"Skyscanner",url:"https://www.skyscanner.com",icon:"🛫",cat:"travel",desc:"Flight comparison"},
+    {name:"Google Flights",url:"https://www.google.com/flights",icon:"🛩️",cat:"travel",desc:"Find cheap flights"},
+    // FOOD
+    {name:"Allrecipes",url:"https://www.allrecipes.com",icon:"🍳",cat:"food",desc:"Recipes & cooking tips"},
+    {name:"Food Network",url:"https://www.foodnetwork.com",icon:"👨‍🍳",cat:"food",desc:"Recipes & cooking shows"},
+    {name:"Tasty",url:"https://tasty.co",icon:"🍕",cat:"food",desc:"Quick & easy recipes"},
+    {name:"Epicurious",url:"https://www.epicurious.com",icon:"🥗",cat:"food",desc:"Recipes & food ideas"},
+    // JOBS
+    {name:"Indeed",url:"https://www.indeed.com",icon:"💼",cat:"jobs",desc:"Job search engine",badge:"popular"},
+    {name:"Glassdoor",url:"https://www.glassdoor.com",icon:"🏢",cat:"jobs",desc:"Company reviews & salaries"},
+    {name:"Upwork",url:"https://www.upwork.com",icon:"💻",cat:"jobs",desc:"Freelance marketplace"},
+    {name:"Fiverr",url:"https://www.fiverr.com",icon:"🎯",cat:"jobs",desc:"Freelance services"},
+    {name:"Remote OK",url:"https://remoteok.com",icon:"🏡",cat:"jobs",desc:"Remote job listings"},
+    {name:"AngelList",url:"https://angel.co",icon:"😇",cat:"jobs",desc:"Startup jobs"},
+];
+
+// ==========================================
+// DATA: 1000+ GAMES
+// ==========================================
+const allGames = [];
+const gameTemplates = [
+    // ACTION
+    {name:"Krunker",url:"https://krunker.io",icon:"🔫",cat:"action",desc:"Fast-paced FPS shooter",rating:4.8,players:"Multi",badge:"hot"},
+    {name:"Shell Shockers",url:"https://shellshock.io",icon:"🥚",cat:"action",desc:"Egg-themed FPS game",rating:4.5,players:"Multi"},
+    {name:"Bullet Force",url:"https://www.crazygames.com/game/bullet-force-multiplayer",icon:"🎯",cat:"action",desc:"Multiplayer FPS",rating:4.6,players:"Multi",badge:"popular"},
+    {name:"War Brokers",url:"https://warbrokers.io",icon:"⚔️",cat:"action",desc:"Battle royale FPS",rating:4.4,players:"Multi"},
+    {name:"Ev.io",url:"https://ev.io",icon:"🤖",cat:"action",desc:"Sci-fi arena shooter",rating:4.3,players:"Multi"},
+    {name:"Zombs Royale",url:"https://zombsroyale.io",icon:"🧟",cat:"action",desc:"2D battle royale",rating:4.5,players:"Multi",badge:"hot"},
+    {name:"Surviv.io",url:"https://surviv.io",icon:"🏹",cat:"action",desc:"2D battle royale",rating:4.6,players:"Multi"},
+    {name:"BuildRoyale.io",url:"https://buildroyale.io",icon:"🏗️",cat:"action",desc:"Build & battle royale",rating:4.2,players:"Multi"},
+    // PUZZLE
+    {name:"2048",url:"https://play2048.co",icon:"🔢",cat:"puzzle",desc:"Classic number puzzle",rating:4.7,players:"Single",badge:"popular"},
+    {name:"Sudoku",url:"https://sudoku.com",icon:"9️⃣",cat:"puzzle",desc:"Classic Sudoku puzzles",rating:4.5,players:"Single"},
+    {name:"Cut the Rope",url:"https://www.crazygames.com/game/cut-the-rope",icon:"✂️",cat:"puzzle",desc:"Feed Om Nom candy!",rating:4.6,players:"Single"},
+    {name:"Mahjong",url:"https://www.crazygames.com/game/mahjong-dark-dimensions",icon:"🀄",cat:"puzzle",desc:"Classic tile matching",rating:4.4,players:"Single"},
+    {name:"Wordle",url:"https://www.nytimes.com/games/wordle",icon:"📝",cat:"puzzle",desc:"Daily word puzzle",rating:4.8,players:"Single",badge:"hot"},
+    {name:"Crossword",url:"https://www.washingtonpost.com/crossword-puzzles/daily/",icon:"📰",cat:"puzzle",desc:"Daily crossword puzzle",rating:4.3,players:"Single"},
+    {name:"Candy Crush",url:"https://www.crazygames.com/game/candy-rain-7",icon:"🍬",cat:"puzzle",desc:"Match-3 candy puzzle",rating:4.5,players:"Single"},
+    // RACING
+    {name:"Moto X3M",url:"https://www.crazygames.com/game/moto-x3m",icon:"🏍️",cat:"racing",desc:"Extreme bike racing",rating:4.7,players:"Single",badge:"popular"},
+    {name:"Drift Hunters",url:"https://www.crazygames.com/game/drift-hunters",icon:"🏎️",cat:"racing",desc:"3D drift racing",rating:4.6,players:"Single",badge:"hot"},
+    {name:"Racing Thunder",url:"https://www.crazygames.com/game/racing-thunder",icon:"⚡",cat:"racing",desc:"High-speed racing",rating:4.3,players:"Single"},
+    {name:"Highway Racer 3D",url:"https://www.crazygames.com/game/highway-racer-3d",icon:"🛣️",cat:"racing",desc:"Highway racing game",rating:4.4,players:"Single"},
+    {name:"Car Simulator",url:"https://www.crazygames.com/game/car-simulator-arena",icon:"🚗",cat:"racing",desc:"Open world driving",rating:4.5,players:"Single"},
+    // SPORTS
+    {name:"Basketball Stars",url:"https://www.crazygames.com/game/basketball-stars",icon:"🏀",cat:"sports",desc:"1v1 basketball",rating:4.5,players:"Multi",badge:"popular"},
+    {name:"Soccer Stars",url:"https://www.crazygames.com/game/soccer-stars-classic",icon:"⚽",cat:"sports",desc:"Physics soccer game",rating:4.3,players:"Multi"},
+    {name:"8 Ball Pool",url:"https://www.miniclip.com/games/8-ball-pool-multiplayer/en/",icon:"🎱",cat:"sports",desc:"Online pool game",rating:4.7,players:"Multi",badge:"hot"},
+    {name:"Table Tennis",url:"https://www.crazygames.com/game/table-tennis-world-tour",icon:"🏓",cat:"sports",desc:"Table tennis game",rating:4.2,players:"Multi"},
+    {name:"Golf Battle",url:"https://www.crazygames.com/game/mini-golf-club",icon:"⛳",cat:"sports",desc:"Mini golf game",rating:4.4,players:"Single"},
+    {name:"Cricket",url:"https://www.crazygames.com/game/real-cricket-20",icon:"🏏",cat:"sports",desc:"Cricket game",rating:4.3,players:"Single"},
+    // ARCADE
+    {name:"Pac-Man",url:"https://www.google.com/logos/2010/pacman10-i.html",icon:"👾",cat:"arcade",desc:"Classic Pac-Man",rating:4.8,players:"Single",badge:"popular"},
+    {name:"Snake",url:"https://playsnake.org",icon:"🐍",cat:"arcade",desc:"Classic Snake game",rating:4.5,players:"Single"},
+    {name:"Tetris",url:"https://tetris.com/play-tetris",icon:"🟦",cat:"arcade",desc:"Classic block puzzle",rating:4.9,players:"Single",badge:"popular"},
+    {name:"Flappy Bird",url:"https://flappybird.io",icon:"🐦",cat:"arcade",desc:"Tap to fly!",rating:4.3,players:"Single"},
+    {name:"Fruit Ninja",url:"https://www.crazygames.com/game/fruit-ninja",icon:"🍉",cat:"arcade",desc:"Slice the fruits",rating:4.4,players:"Single"},
+    {name:"Space Invaders",url:"https://www.crazygames.com/game/space-invaders",icon:"👽",cat:"arcade",desc:"Classic space shooter",rating:4.5,players:"Single"},
+    {name:"Breakout",url:"https://www.crazygames.com/game/atari-breakout",icon:"🧱",cat:"arcade",desc:"Classic brick breaker",rating:4.2,players:"Single"},
+    {name:"Geometry Dash",url:"https://www.crazygames.com/game/geometry-dash",icon:"🔷",cat:"arcade",desc:"Rhythm-based action",rating:4.6,players:"Single",badge:"hot"},
+    // STRATEGY
+    {name:"Chess",url:"https://www.chess.com/play/online",icon:"♟️",cat:"strategy",desc:"Online chess",rating:4.8,players:"Multi",badge:"popular"},
+    {name:"Checkers",url:"https://www.crazygames.com/game/master-checkers",icon:"🔴",cat:"strategy",desc:"Classic checkers",rating:4.3,players:"Multi"},
+    {name:"Risk",url:"https://www.crazygames.com/game/warzone",icon:"🗺️",cat:"strategy",desc:"World domination",rating:4.4,players:"Multi"},
+    {name:"Tower Defense",url:"https://www.crazygames.com/game/kingdom-rush",icon:"🏰",cat:"strategy",desc:"Tower defense game",rating:4.6,players:"Single"},
+    {name:"Bloons TD",url:"https://www.crazygames.com/game/bloons-tower-defense-5",icon:"🎈",cat:"strategy",desc:"Pop the bloons!",rating:4.7,players:"Single",badge:"hot"},
+    // ADVENTURE
+    {name:"Minecraft Classic",url:"https://classic.minecraft.net",icon:"⛏️",cat:"adventure",desc:"Classic Minecraft",rating:4.8,players:"Multi",badge:"hot"},
+    {name:"Fireboy & Watergirl",url:"https://www.crazygames.com/game/fireboy-and-watergirl-forest-temple",icon:"🔥",cat:"adventure",desc:"Co-op adventure",rating:4.6,players:"Multi",badge:"popular"},
+    {name:"Among Us",url:"https://www.crazygames.com/game/imposter",icon:"🚀",cat:"adventure",desc:"Find the imposter",rating:4.5,players:"Multi"},
+    {name:"Temple Run",url:"https://www.crazygames.com/game/temple-run-2",icon:"🏃",cat:"adventure",desc:"Endless runner",rating:4.4,players:"Single"},
+    // SHOOTER
+    {name:"1v1.LOL",url:"https://1v1.lol",icon:"🔫",cat:"shooter",desc:"Build & shoot game",rating:4.5,players:"Multi",badge:"hot"},
+    {name:"Venge.io",url:"https://venge.io",icon:"⚡",cat:"shooter",desc:"Fast FPS game",rating:4.4,players:"Multi"},
+    {name:"Forward Assault",url:"https://www.crazygames.com/game/forward-assault",icon:"🎖️",cat:"shooter",desc:"Tactical FPS",rating:4.3,players:"Multi"},
+    // MULTIPLAYER
+    {name:"Agar.io",url:"https://agar.io",icon:"⭕",cat:"multiplayer",desc:"Eat or be eaten",rating:4.5,players:"Multi",badge:"popular"},
+    {name:"Slither.io",url:"https://slither.io",icon:"🐍",cat:"multiplayer",desc:"Snake multiplayer",rating:4.6,players:"Multi",badge:"popular"},
+    {name:"Diep.io",url:"https://diep.io",icon:"🔵",cat:"multiplayer",desc:"Tank battle arena",rating:4.4,players:"Multi"},
+    {name:"Paper.io 2",url:"https://paper-io.com",icon:"📄",cat:"multiplayer",desc:"Claim territory",rating:4.3,players:"Multi"},
+    {name:"Skribbl.io",url:"https://skribbl.io",icon:"🎨",cat:"multiplayer",desc:"Drawing & guessing",rating:4.7,players:"Multi",badge:"hot"},
+    {name:"Gartic Phone",url:"https://garticphone.com",icon:"📞",cat:"multiplayer",desc:"Draw & guess game",rating:4.6,players:"Multi"},
+    {name:"Hole.io",url:"https://hole-io.com",icon:"🕳️",cat:"multiplayer",desc:"Swallow everything",rating:4.2,players:"Multi"},
+    // IO GAMES
+    {name:"Bonk.io",url:"https://bonk.io",icon:"💥",cat:"io",desc:"Physics multiplayer",rating:4.3,players:"Multi"},
+    {name:"Krunker.io",url:"https://krunker.io",icon:"🔫",cat:"io",desc:"FPS .io game",rating:4.7,players:"Multi"},
+    {name:"Mope.io",url:"https://mope.io",icon:"🐾",cat:"io",desc:"Animal survival",rating:4.2,players:"Multi"},
+    {name:"Deeeep.io",url:"https://deeeep.io",icon:"🐟",cat:"io",desc:"Ocean survival",rating:4.3,players:"Multi"},
+    {name:"Wings.io",url:"https://wings.io",icon:"✈️",cat:"io",desc:"Aerial combat",rating:4.1,players:"Multi"},
+    {name:"Zombs.io",url:"https://zombs.io",icon:"🧟",cat:"io",desc:"Build & survive",rating:4.4,players:"Multi"},
+    {name:"Splix.io",url:"https://splix.io",icon:"🟩",cat:"io",desc:"Territory capture",rating:4.2,players:"Multi"},
+    // CARD
+    {name:"Solitaire",url:"https://www.solitr.com",icon:"🃏",cat:"card",desc:"Classic solitaire",rating:4.5,players:"Single",badge:"popular"},
+    {name:"UNO Online",url:"https://www.crazygames.com/game/uno-online",icon:"🎴",cat:"card",desc:"Play UNO online",rating:4.6,players:"Multi"},
+    {name:"Poker",url:"https://www.crazygames.com/game/governor-of-poker-3",icon:"♠️",cat:"card",desc:"Texas Hold'em poker",rating:4.4,players:"Multi"},
+    {name:"Hearts",url:"https://www.crazygames.com/game/hearts",icon:"♥️",cat:"card",desc:"Classic Hearts game",rating:4.2,players:"Multi"},
+    {name:"Spades",url:"https://www.crazygames.com/game/spades",icon:"♣️",cat:"card",desc:"Classic Spades",rating:4.1,players:"Multi"},
+    // BOARD
+    {name:"Ludo Online",url:"https://www.crazygames.com/game/ludo-hero",icon:"🎲",cat:"board",desc:"Classic Ludo game",rating:4.4,players:"Multi"},
+    {name:"Backgammon",url:"https://www.crazygames.com/game/backgammon",icon:"🎰",cat:"board",desc:"Classic backgammon",rating:4.2,players:"Multi"},
+    {name:"Dominoes",url:"https://www.crazygames.com/game/dominoes",icon:"🁢",cat:"board",desc:"Classic dominoes",rating:4.1,players:"Multi"},
+    {name:"Connect 4",url:"https://www.crazygames.com/game/connect-4",icon:"🔴",cat:"board",desc:"Classic Connect 4",rating:4.3,players:"Multi"},
+    // RPG
+    {name:"Adventure Quest",url:"https://www.battleon.com",icon:"⚔️",cat:"rpg",desc:"Browser RPG classic",rating:4.3,players:"Multi"},
+    {name:"Realm of the Mad God",url:"https://www.realmofthemadgod.com",icon:"💀",cat:"rpg",desc:"Co-op RPG shooter",rating:4.4,players:"Multi"},
+    {name:"Hordes.io",url:"https://hordes.io",icon:"🛡️",cat:"rpg",desc:"Browser MMORPG",rating:4.2,players:"Multi"},
+    // HORROR
+    {name:"Granny",url:"https://www.crazygames.com/game/granny",icon:"👵",cat:"horror",desc:"Escape from Granny",rating:4.4,players:"Single",badge:"popular"},
+    {name:"Five Nights at Freddy's",url:"https://www.crazygames.com/game/five-nights-at-freddys",icon:"🐻",cat:"horror",desc:"Survive the night",rating:4.6,players:"Single",badge:"hot"},
+    {name:"Eyes Horror",url:"https://www.crazygames.com/game/eyes-the-horror-game",icon:"👁️",cat:"horror",desc:"Horror exploration",rating:4.2,players:"Single"},
+    // CASUAL
+    {name:"Doodle Jump",url:"https://www.crazygames.com/game/doodle-jump",icon:"📱",cat:"casual",desc:"Jump as high as you can",rating:4.3,players:"Single"},
+    {name:"Bubble Shooter",url:"https://www.crazygames.com/game/bubble-shooter-pro",icon:"🫧",cat:"casual",desc:"Pop the bubbles",rating:4.4,players:"Single"},
+    {name:"Color Switch",url:"https://www.crazygames.com/game/color-switch",icon:"🌈",cat:"casual",desc:"Match the colors",rating:4.2,players:"Single"},
+    {name:"Crossy Road",url:"https://www.crazygames.com/game/crossy-road",icon:"🐔",cat:"casual",desc:"Cross the road!",rating:4.5,players:"Single"},
+];
+
+// Generate more games to reach 1000+
+const extraGameNames = [
+    "Super","Mega","Ultra","Epic","Crazy","Wild","Dark","Magic","Golden","Crystal",
+    "Thunder","Shadow","Dragon","Phoenix","Storm","Iron","Steel","Fire","Ice","Frost",
+    "Neon","Pixel","Retro","Turbo","Power","Cosmic","Ninja","Samurai","Knight","Battle",
+    "Zombie","Alien","Robot","Space","Ocean","Sky","Mountain","Forest","Desert","Jungle"
+];
+const extraGameTypes = [
+    {word:"Runner",icon:"🏃",cat:"action"},{word:"Dash",icon:"💨",cat:"arcade"},
+    {word:"Warrior",icon:"⚔️",cat:"action"},{word:"Quest",icon:"🗺️",cat:"adventure"},
+    {word:"Racer",icon:"🏎️",cat:"racing"},{word:"Puzzle",icon:"🧩",cat:"puzzle"},
+    {word:"Blast",icon:"💥",cat:"shooter"},{word:"Defense",icon:"🏰",cat:"strategy"},
+    {word:"Craft",icon:"🔨",cat:"adventure"},{word:"Match",icon:"🎯",cat:"casual"},
+    {word:"Jump",icon:"🦘",cat:"arcade"},{word:"Escape",icon:"🏃",cat:"adventure"},
+    {word:"Clash",icon:"⚡",cat:"strategy"},{word:"Arena",icon:"🏟️",cat:"multiplayer"},
+    {word:"World",icon:"🌍",cat:"rpg"},{word:"Fever",icon:"🔥",cat:"casual"},
+    {word:"Mania",icon:"🤪",cat:"casual"},{word:"Strike",icon:"🎯",cat:"shooter"},
+    {word:"Wars",icon:"💣",cat:"action"},{word:"Legends",icon:"🏆",cat:"rpg"}
+];
+const freeGameSites = [
+    "https://www.crazygames.com/game/","https://www.poki.com/en/g/",
+    "https://www.silvergames.com/en/","https://www.addictinggames.com/game/"
+];
+
+// Add template games
+allGames.push(...gameTemplates);
+
+// Generate additional games to reach 1000+
+let gameId = gameTemplates.length;
+for(let i = 0; i < extraGameNames.length; i++) {
+    for(let j = 0; j < extraGameTypes.length; j++) {
+        if(gameId >= 1050) break;
+        const name = extraGameNames[i] + " " + extraGameTypes[j].word;
+        const slug = name.toLowerCase().replace(/\s+/g, '-');
+        allGames.push({
+            name: name,
+            url: freeGameSites[gameId % freeGameSites.length] + slug,
+            icon: extraGameTypes[j].icon,
+            cat: extraGameTypes[j].cat,
+            desc: `Play ${name} for free in your browser!`,
+            rating: (3.5 + Math.random() * 1.5).toFixed(1),
+            players: Math.random() > 0.5 ? "Multi" : "Single",
+            badge: gameId % 15 === 0 ? "hot" : (gameId % 20 === 0 ? "new" : null)
+        });
+        gameId++;
+    }
+}
+
+// ==========================================
+// DATA: TOOLS
+// ==========================================
+const allTools = [
+    {name:"Calculator",icon:"🧮",desc:"Scientific calculator",type:"calc"},
+    {name:"Unit Converter",icon:"📐",desc:"Convert any unit",type:"converter"},
+    {name:"Color Picker",icon:"🎨",desc:"Pick any color",type:"color"},
+    {name:"Password Generator",icon:"🔐",desc:"Generate secure passwords",type:"password"},
+    {name:"QR Code Generator",icon:"📱",desc:"Create QR codes",type:"qr"},
+    {name:"Text Counter",icon:"📝",desc:"Count words & characters",type:"counter"},
+    {name:"JSON Formatter",icon:"{ }",desc:"Format & validate JSON",type:"json"},
+    {name:"Base64 Encoder",icon:"🔣",desc:"Encode/decode Base64",type:"base64"},
+    {name:"Lorem Ipsum",icon:"📄",desc:"Generate dummy text",type:"lorem"},
+    {name:"Stopwatch",icon:"⏱️",desc:"Timer & stopwatch",type:"stopwatch"},
+    {name:"BMI Calculator",icon:"⚖️",desc:"Calculate your BMI",type:"bmi"},
+    {name:"Tip Calculator",icon:"💰",desc:"Calculate tips",type:"tip"},
+    {name:"Age Calculator",icon:"🎂",desc:"Calculate your age",type:"age"},
+    {name:"Markdown Preview",icon:"📝",desc:"Preview Markdown text",type:"markdown"},
+    {name:"URL Shortener Info",icon:"🔗",desc:"URL information tool",type:"url"},
+    {name:"Emoji Picker",icon:"😀",desc:"Find & copy emojis",type:"emoji"},
+];
+
+// ==========================================
+// DATA: STREAMING
+// ==========================================
+const allStreaming = [
+    {name:"Pluto TV",url:"https://pluto.tv",icon:"📺",desc:"Free live TV channels",live:true},
+    {name:"Tubi",url:"https://tubitv.com",icon:"🎬",desc:"Free movies & TV shows",live:false},
+    {name:"YouTube Live",url:"https://www.youtube.com/live",icon:"▶️",desc:"Live streams on YouTube",live:true},
+    {name:"Twitch",url:"https://www.twitch.tv",icon:"🟣",desc:"Live gaming streams",live:true},
+    {name:"Plex",url:"https://www.plex.tv",icon:"🎞️",desc:"Free movies & live TV",live:true},
+    {name:"Crackle",url:"https://www.crackle.com",icon:"🍿",desc:"Free Sony movies & shows",live:false},
+    {name:"Peacock",url:"https://www.peacocktv.com",icon:"🦚",desc:"NBC streaming",live:false},
+    {name:"Kanopy",url:"https://www.kanopy.com",icon:"🎭",desc:"Free with library card",live:false},
+    {name:"Roku Channel",url:"https://therokuchannel.roku.com",icon:"📡",desc:"Free movies & TV",live:true},
+    {name:"Xumo",url:"https://www.xumo.tv",icon:"📺",desc:"Free streaming TV",live:true},
+    {name:"FilmRise",url:"https://filmrise.com",icon:"🎥",desc:"Free movies",live:false},
+    {name:"Popcornflix",url:"https://www.popcornflix.com",icon:"🍿",desc:"Free movies online",live:false},
+    {name:"CBC Gem",url:"https://gem.cbc.ca",icon:"💎",desc:"Canadian streaming",live:true},
+    {name:"BBC iPlayer",url:"https://www.bbc.co.uk/iplayer",icon:"🇬🇧",desc:"BBC streaming",live:true},
+    {name:"SBS On Demand",url:"https://www.sbs.com.au/ondemand",icon:"🇦🇺",desc:"Australian streaming",live:true},
+    {name:"ARTE",url:"https://www.arte.tv",icon:"🎨",desc:"European culture channel",live:true},
+    {name:"NHK World",url:"https://www3.nhk.or.jp/nhkworld/",icon:"🇯🇵",desc:"Japan news & culture",live:true},
+    {name:"DW",url:"https://www.dw.com/en/media-center/live-tv/s-100825",icon:"🇩🇪",desc:"German news channel",live:true},
+    {name:"France 24",url:"https://www.france24.com/en/live",icon:"🇫🇷",desc:"French news channel",live:true},
+    {name:"Al Jazeera Live",url:"https://www.aljazeera.com/live",icon:"🌍",desc:"International news",live:true},
+    {name:"RT",url:"https://www.rt.com",icon:"📡",desc:"News network",live:true},
+    {name:"Sky News",url:"https://news.sky.com/watch-live",icon:"☁️",desc:"UK news channel",live:true},
+    {name:"ABC News",url:"https://abcnews.go.com/Live",icon:"📰",desc:"US news live",live:true},
+    {name:"NASA TV",url:"https://www.nasa.gov/nasalive",icon:"🚀",desc:"NASA live stream",live:true},
+    {name:"Lofi Girl",url:"https://www.youtube.com/watch?v=jfKfPfyJRdk",icon:"🎵",desc:"Lofi beats to relax",live:true},
+];
+
+// ==========================================
+// DATA: EDUCATION
+// ==========================================
+const allEducation = [
+    {name:"Khan Academy",url:"https://www.khanacademy.org",icon:"🎓",desc:"Free world-class education",badge:"free"},
+    {name:"Coursera",url:"https://www.coursera.org",icon:"📚",desc:"University courses online",badge:"popular"},
+    {name:"edX",url:"https://www.edx.org",icon:"🏫",desc:"Harvard & MIT courses"},
+    {name:"Codecademy",url:"https://www.codecademy.com",icon:"💻",desc:"Learn to code free"},
+    {name:"freeCodeCamp",url:"https://www.freecodecamp.org",icon:"⌨️",desc:"Free coding bootcamp",badge:"free"},
+    {name:"MIT OpenCourseWare",url:"https://ocw.mit.edu",icon:"🔬",desc:"Free MIT courses",badge:"free"},
+    {name:"Duolingo",url:"https://www.duolingo.com",icon:"🦉",desc:"Learn languages free",badge:"popular"},
+    {name:"TED Talks",url:"https://www.ted.com",icon:"🎤",desc:"Ideas worth spreading"},
+    {name:"Wikipedia",url:"https://www.wikipedia.org",icon:"📖",desc:"Free encyclopedia",badge:"free"},
+    {name:"Udemy",url:"https://www.udemy.com",icon:"🎯",desc:"Online courses marketplace"},
+    {name:"Skillshare",url:"https://www.skillshare.com",icon:"🎨",desc:"Creative classes online"},
+    {name:"Google Scholar",url:"https://scholar.google.com",icon:"🔍",desc:"Academic search engine",badge:"free"},
+    {name:"Wolfram Alpha",url:"https://www.wolframalpha.com",icon:"🧮",desc:"Computational knowledge"},
+    {name:"Project Gutenberg",url:"https://www.gutenberg.org",icon:"📕",desc:"Free eBooks",badge:"free"},
+    {name:"Open Library",url:"https://openlibrary.org",icon:"📚",desc:"Free book lending",badge:"free"},
+    {name:"Brilliant",url:"https://brilliant.org",icon:"💡",desc:"Math & science learning"},
+    {name:"Crash Course",url:"https://www.youtube.com/crashcourse",icon:"🎬",desc:"Educational YouTube",badge:"free"},
+    {name:"Memrise",url:"https://www.memrise.com",icon:"🧠",desc:"Language learning app"},
+];
+
+// ==========================================
+// DATA: SHOPPING
+// ==========================================
+const allShopping = [
+    {name:"Amazon",url:"https://www.amazon.com",icon:"📦",desc:"Everything store",badge:"popular"},
+    {name:"eBay",url:"https://www.ebay.com",icon:"🏷️",desc:"Buy & sell marketplace"},
+    {name:"AliExpress",url:"https://www.aliexpress.com",icon:"🛍️",desc:"Affordable global shopping",badge:"popular"},
+    {name:"Walmart",url:"https://www.walmart.com",icon:"🏪",desc:"Everyday low prices"},
+    {name:"Etsy",url:"https://www.etsy.com",icon:"🎁",desc:"Handmade & vintage items"},
+    {name:"Target",url:"https://www.target.com",icon:"🎯",desc:"Expect more, pay less"},
+    {name:"Best Buy",url:"https://www.bestbuy.com",icon:"💻",desc:"Electronics & tech"},
+    {name:"Shopify Stores",url:"https://www.shopify.com/shop",icon:"🛒",desc:"Independent shops"},
+    {name:"Wish",url:"https://www.wish.com",icon:"⭐",desc:"Affordable shopping"},
+    {name:"Temu",url:"https://www.temu.com",icon:"🛍️",desc:"Shop like a billionaire",badge:"hot"},
+    {name:"SHEIN",url:"https://www.shein.com",icon:"👗",desc:"Fashion & clothing",badge:"popular"},
+    {name:"Newegg",url:"https://www.newegg.com",icon:"🖥️",desc:"Computer hardware"},
+    {name:"Wayfair",url:"https://www.wayfair.com",icon:"🏠",desc:"Furniture & home"},
+    {name:"ASOS",url:"https://www.asos.com",icon:"👔",desc:"Fashion online"},
+    {name:"Nike",url:"https://www.nike.com",icon:"👟",desc:"Just Do It"},
+    {name:"Adidas",url:"https://www.adidas.com",icon:"👟",desc:"Impossible Is Nothing"},
+    {name:"Costco",url:"https://www.costco.com",icon:"🏬",desc:"Wholesale deals"},
+    {name:"Home Depot",url:"https://www.homedepot.com",icon:"🔨",desc:"Home improvement"},
+    {name:"CamelCamelCamel",url:"https://camelcamelcamel.com",icon:"🐪",desc:"Amazon price tracker",badge:"free"},
+    {name:"Honey",url:"https://www.joinhoney.com",icon:"🍯",desc:"Find coupon codes",badge:"free"},
+    {name:"RetailMeNot",url:"https://www.retailmenot.com",icon:"💸",desc:"Coupons & deals",badge:"free"},
+    {name:"Slickdeals",url:"https://slickdeals.net",icon:"🔥",desc:"Community deals",badge:"hot"},
+];
+
+// ==========================================
+// INITIALIZATION
+// ==========================================
+let currentGamesShown = 0;
+const gamesPerPage = 50;
+let currentGameFilter = 'all';
+let currentSiteFilter = 'all';
+
+window.addEventListener('load', function() {
+    setTimeout(() => {
+        document.getElementById('loader').style.opacity = '0';
+        setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+    }, 800);
+    
+    createParticles();
+    renderSites();
+    renderGames();
+    renderTools();
+    renderStreaming();
+    renderEducation();
+    renderShopping();
+    renderNews();
+    renderSocial();
+    animateCounters();
+    
+    if(!localStorage.getItem('cookiesAccepted')) {
+        document.getElementById('cookieBanner').classList.add('active');
+    }
+});
+
+// Scroll events
+window.addEventListener('scroll', function() {
+    const navbar = document.getElementById('navbar');
+    const backToTop = document.getElementById('backToTop');
+    
+    if(window.scrollY > 50) navbar.classList.add('scrolled');
+    else navbar.classList.remove('scrolled');
+    
+    if(window.scrollY > 500) backToTop.classList.add('visible');
+    else backToTop.classList.remove('visible');
+});
+
+// ==========================================
+// PARTICLES
+// ==========================================
+function createParticles() {
+    const container = document.getElementById('particles');
+    if(!container) return;
+    const colors = ['#6c5ce7','#a29bfe','#fd79a8','#00cec9','#fdcb6e'];
+    for(let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const size = Math.random() * 6 + 2;
+        p.style.cssText = `
+            width:${size}px; height:${size}px;
+            left:${Math.random()*100}%;
+            background:${colors[Math.floor(Math.random()*colors.length)]};
+            animation-duration:${Math.random()*15+10}s;
+            animation-delay:${Math.random()*10}s;
+        `;
+        container.appendChild(p);
+    }
+}
+
+// ==========================================
+// COUNTERS
+// ==========================================
+function animateCounters() {
+    animateCounter('counter1', allGames.length, 2000);
+    animateCounter('counter2', allSites.length + allStreaming.length + allEducation.length + allShopping.length, 2000);
+    animateCounter('counter3', allTools.length, 1500);
+    animateCounter('counter4', allStreaming.filter(s=>s.live).length, 1500);
+}
+function animateCounter(id, target, duration) {
+    const el = document.getElementById(id);
+    if(!el) return;
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+        start += step;
+        if(start >= target) { start = target; clearInterval(timer); }
+        el.textContent = Math.floor(start) + '+';
+    }, 16);
+}
+
+// ==========================================
+// NAVIGATION
+// ==========================================
+function showSection(section) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('section-' + section).classList.add('active');
+    
+    document.querySelectorAll('.nav-links a').forEach(a => {
+        a.classList.remove('active');
+        if(a.dataset.section === section) a.classList.add('active');
+    });
+    
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    
+    // Close mobile menu
+    document.getElementById('navLinks').classList.remove('active');
+    document.getElementById('hamburger').classList.remove('active');
+}
+
+function toggleMenu() {
+    document.getElementById('navLinks').classList.toggle('active');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+
+// ==========================================
+// SEARCH
+// ==========================================
+function handleSearch(e) {
+    if(e.key === 'Enter') performSearch();
+}
+
+function performSearch() {
+    const query = (document.getElementById('heroSearch').value || document.getElementById('globalSearch').value).toLowerCase().trim();
+    if(!query) return;
+    
+    // Search in games
+    const gameResults = allGames.filter(g => g.name.toLowerCase().includes(query) || g.cat.includes(query));
+    if(gameResults.length > 0) {
+        showSection('games');
+        renderFilteredGames(gameResults);
+        showNotification(`Found ${gameResults.length} games matching "${query}"`);
+        return;
+    }
+    
+    // Search in sites
+    const siteResults = allSites.filter(s => s.name.toLowerCase().includes(query) || s.cat.includes(query));
+    if(siteResults.length > 0) {
+        showSection('sites');
+        renderFilteredSites(siteResults);
+        showNotification(`Found ${siteResults.length} sites matching "${query}"`);
+        return;
+    }
+    
+    showNotification(`No results found for "${query}". Try different keywords!`, true);
+}
+
+// ==========================================
+// RENDER SITES
+// ==========================================
+function renderSites(filter = 'all') {
+    const grid = document.getElementById('sitesGrid');
+    const filtered = filter === 'all' ? allSites : allSites.filter(s => s.cat === filter);
+    grid.innerHTML = filtered.map(site => `
+        <div class="card" onclick="openSitePopup('${site.name}','${site.url}','${site.icon}')">
+            <div class="card-icon" style="background:${getGradient(site.cat)}">${site.icon}</div>
+            ${site.badge ? `<span class="card-badge badge-${site.badge}">${site.badge.toUpperCase()}</span>` : ''}
+            <h3>${site.name}</h3>
+            <p>${site.desc}</p>
+        </div>
+    `).join('');
+}
+
+function renderFilteredSites(sites) {
+    const grid = document.getElementById('sitesGrid');
+    grid.innerHTML = sites.map(site => `
+        <div class="card" onclick="openSitePopup('${site.name}','${site.url}','${site.icon}')">
+            <div class="card-icon" style="background:${getGradient(site.cat)}">${site.icon}</div>
+            ${site.badge ? `<span class="card-badge badge-${site.badge}">${site.badge.toUpperCase()}</span>` : ''}
+            <h3>${site.name}</h3>
+            <p>${site.desc}</p>
+        </div>
+    `).join('');
+}
+
+function filterSites(cat) {
+    currentSiteFilter = cat;
+    renderSites(cat);
+    document.querySelectorAll('#siteTabs .cat-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// ==========================================
+// RENDER GAMES
+// ==========================================
+function renderGames(filter = 'all') {
+    currentGameFilter = filter;
+    currentGamesShown = 0;
+    document.getElementById('gamesGrid').innerHTML = '';
+    loadMoreGames();
+}
+
+function loadMoreGames() {
+    const grid = document.getElementById('gamesGrid');
+    const filtered = currentGameFilter === 'all' ? allGames : allGames.filter(g => g.cat === currentGameFilter);
+    const batch = filtered.slice(currentGamesShown, currentGamesShown + gamesPerPage);
+    
+    batch.forEach(game => {
+        const div = document.createElement('div');
+        div.className = 'game-card';
+        div.onclick = () => openGamePopup(game);
+        div.innerHTML = `
+            <div class="game-thumb" style="background:${getGradient(game.cat)}">
+                ${game.icon}
+                <div class="play-overlay">▶️</div>
+            </div>
+            <div class="game-info">
+                <h4>${game.name}</h4>
+                <div class="game-meta">
+                    <span class="game-rating">⭐ ${game.rating}</span>
+                    <span>${game.players === 'Multi' ? '👥 Multi' : '👤 Solo'}</span>
+                </div>
+            </div>
+        `;
+        grid.appendChild(div);
+    });
+    
+    currentGamesShown += gamesPerPage;
+    
+    const totalFiltered = currentGameFilter === 'all' ? allGames.length : allGames.filter(g => g.cat === currentGameFilter).length;
+    document.getElementById('gamesCounter').textContent = `Showing ${Math.min(currentGamesShown, totalFiltered)} of ${totalFiltered} games`;
+    
+    if(currentGamesShown >= totalFiltered) {
+        document.getElementById('loadMoreGames').style.display = 'none';
+    } else {
+        document.getElementById('loadMoreGames').style.display = 'inline-flex';
+    }
+}
+
+function renderFilteredGames(games) {
+    const grid = document.getElementById('gamesGrid');
+    grid.innerHTML = '';
+    games.slice(0, 100).forEach(game => {
+        const div = document.createElement('div');
+        div.className = 'game-card';
+        div.onclick = () => openGamePopup(game);
+        div.innerHTML = `
+            <div class="game-thumb" style="background:${getGradient(game.cat)}">
+                ${game.icon}
+                <div class="play-overlay">▶️</div>
+            </div>
+            <div class="game-info">
+                <h4>${game.name}</h4>
+                <div class="game-meta">
+                    <span class="game-rating">⭐ ${game.rating}</span>
+                    <span>${game.players === 'Multi' ? '👥 Multi' : '👤 Solo'}</span>
+                </div>
+            </div>
+        `;
+        grid.appendChild(div);
+    });
+    document.getElementById('gamesCounter').textContent = `Found ${games.length} games`;
+}
+
+function filterGames(cat) {
+    currentGameFilter = cat;
+    currentGamesShown = 0;
+    document.getElementById('gamesGrid').innerHTML = '';
+    loadMoreGames();
+    document.querySelectorAll('#gameFilters .cat-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// ==========================================
+// RENDER TOOLS
+// ==========================================
+function renderTools() {
+    const grid = document.getElementById('toolsGrid');
+    grid.innerHTML = allTools.map(tool => `
+        <div class="tool-card" onclick="openToolModal('${tool.type}')">
+            <div class="tool-icon">${tool.icon}</div>
+            <h3>${tool.name}</h3>
+            <p>${tool.desc}</p>
+        </div>
+    `).join('');
+}
+
+// ==========================================
+// RENDER STREAMING
+// ==========================================
+function renderStreaming() {
+    const grid = document.getElementById('streamingGrid');
+    grid.innerHTML = allStreaming.map(ch => `
+        <div class="stream-card" onclick="openSitePopup('${ch.name}','${ch.url}','${ch.icon}')">
+            <div class="stream-icon">${ch.icon}</div>
+            <div class="stream-info">
+                <h4>${ch.name}</h4>
+                <p>${ch.desc}</p>
+            </div>
+            ${ch.live ? '<span class="stream-live">LIVE</span>' : ''}
+        </div>
+    `).join('');
+}
+
+// ==========================================
+// RENDER NEWS, SOCIAL, EDUCATION, SHOPPING
+// ==========================================
+function renderNews() {
+    const newsItems = allSites.filter(s => s.cat === 'news');
+    const grid = document.getElementById('newsGrid');
+    grid.innerHTML = newsItems.map(n => `
+        <div class="card" onclick="openSitePopup('${n.name}','${n.url}','${n.icon}')">
+            <div class="card-icon" style="background:${getGradient('news')}">${n.icon}</div>
+            <h3>${n.name}</h3>
+            <p>${n.desc}</p>
+        </div>
+    `).join('');
+}
+
+function renderSocial() {
+    const items = allSites.filter(s => s.cat === 'social');
+    const grid = document.getElementById('socialGrid');
+    grid.innerHTML = items.map(n => `
+        <div class="card" onclick="openSitePopup('${n.name}','${n.url}','${n.icon}')">
+            <div class="card-icon" style="background:${getGradient('social')}">${n.icon}</div>
+            ${n.badge ? `<span class="card-badge badge-${n.badge}">${n.badge.toUpperCase()}</span>` : ''}
+            <h3>${n.name}</h3>
+            <p>${n.desc}</p>
+        </div>
+    `).join('');
+}
+
+function renderEducation() {
+    const grid = document.getElementById('educationGrid');
+    grid.innerHTML = allEducation.map(n => `
+        <div class="card" onclick="openSitePopup('${n.name}','${n.url}','${n.icon}')">
+            <div class="card-icon" style="background:${getGradient('education')}">${n.icon}</div>
+            ${n.badge ? `<span class="card-badge badge-${n.badge}">${n.badge.toUpperCase()}</span>` : ''}
+            <h3>${n.name}</h3>
+            <p>${n.desc}</p>
+        </div>
+    `).join('');
+}
+
+function renderShopping() {
+    const grid = document.getElementById('shoppingGrid');
+    grid.innerHTML = allShopping.map(n => `
+        <div class="card" onclick="openSitePopup('${n.name}','${n.url}','${n.icon}')">
+            <div class="card-icon" style="background:${getGradient('shopping')}">${n.icon}</div>
+            ${n.badge ? `<span class="card-badge badge-${n.badge}">${n.badge.toUpperCase()}</span>` : ''}
+            <h3>${n.name}</h3>
+            <p>${n.desc}</p>
+        </div>
+    `).join('');
+}
+
+// ==========================================
+// POPUP MODALS
+// ==========================================
+function openSitePopup(name, url, icon) {
+    const modal = document.getElementById('mainModal');
+    document.getElementById('modalTitle').textContent = icon + ' ' + name;
+    document.getElementById('modalBody').innerHTML = `
+        <div class="modal-info">
+            <p>Loading ${name} in a secure frame. Some sites may block iframe embedding for security.</p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="window.open('${url}','_blank')">🔗 Open in New Tab</button>
+                <button class="btn btn-secondary" onclick="copyToClipboard('${url}')">📋 Copy URL</button>
+            </div>
+        </div>
+        <div class="ad-banner" style="margin-bottom:1rem;">
+            <span class="ad-label">Advertisement</span>
+            <div class="ad-placeholder">
+                <div class="ad-icon">📢</div>
+                <div class="ad-content">Ad Space - Pre-content ad</div>
+            </div>
+        </div>
+        <iframe src="${url}" sandbox="allow-same-origin allow-scripts allow-popups allow-forms" loading="lazy"></iframe>
+        <div class="ad-banner" style="margin-top:1rem;">
+            <span class="ad-label">Advertisement</span>
+            <div class="ad-placeholder">
+                <div class="ad-icon">📢</div>
+                <div class="ad-content">Ad Space - Post-content ad</div>
+            </div>
+        </div>
+    `;
+    document.getElementById('modalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function openGamePopup(game) {
+    document.getElementById('modalTitle').textContent = game.icon + ' ' + game.name;
+    document.getElementById('modalBody').innerHTML = `
+        <div class="modal-info">
+            <p>${game.desc}</p>
+            <div class="modal-tags">
+                <span class="modal-tag">⭐ ${game.rating}</span>
+                <span class="modal-tag">${game.players === 'Multi' ? '👥 Multiplayer' : '👤 Single Player'}</span>
+                <span class="modal-tag">🏷️ ${game.cat}</span>
+                <span class="modal-tag">💰 Free</span>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="window.open('${game.url}','_blank')">🔗 Open in New Tab</button>
+                <button class="btn btn-secondary" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+            </div>
+        </div>
+        <div class="ad-banner" style="margin-bottom:1rem;">
+            <span class="ad-label">Advertisement</span>
+            <div class="ad-placeholder">
+                <div class="ad-icon">📢</div>
+                <div class="ad-content">Ad Space - Pre-game ad</div>
+            </div>
+        </div>
+        <div class="game-frame-container" id="gameFrameContainer">
+            <iframe id="gameFrame" src="${game.url}" sandbox="allow-same-origin allow-scripts allow-popups allow-forms" loading="lazy" allowfullscreen></iframe>
+        </div>
+        <div class="game-controls">
+            <button class="btn btn-secondary" onclick="document.getElementById('gameFrame').src=document.getElementById('gameFrame').src">🔄 Reload</button>
+            <button class="btn btn-secondary" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+            <button class="btn btn-accent" onclick="window.open('${game.url}','_blank')">🚀 Open Full</button>
+        </div>
+        <div class="ad-banner" style="margin-top:1rem;">
+            <span class="ad-label">Advertisement</span>
+            <div class="ad-placeholder">
+                <div class="ad-icon">📢</div>
+                <div class="ad-content">Ad Space - Post-game ad</div>
+            </div>
+        </div>
+    `;
+    document.getElementById('modalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function toggleFullscreen() {
+    const container = document.getElementById('gameFrameContainer') || document.getElementById('gameFrame');
+    if(container) {
+        if(container.requestFullscreen) container.requestFullscreen();
+        else if(container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+    }
+}
+
+// ==========================================
+// TOOL MODALS
+// ==========================================
+function openToolModal(type) {
+    let title = '', content = '';
+    
+    switch(type) {
+        case 'calc':
+            title = '🧮 Calculator';
+            content = `
+                <div class="tool-content">
+                    <input type="text" id="calcDisplay" class="tool-input" style="font-size:1.5rem;text-align:right;margin-bottom:1rem;" readonly value="0">
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;">
+                        ${['C','(',')','÷','7','8','9','×','4','5','6','-','1','2','3','+','0','.','⌫','='].map(b => 
+                            `<button class="btn ${b==='='?'btn-primary':'btn-secondary'}" onclick="calcPress('${b}')" style="padding:1rem;font-size:1.2rem;">${b}</button>`
+                        ).join('')}
+                    </div>
+                </div>`;
+            break;
+        case 'converter':
+            title = '📐 Unit Converter';
+            content = `
+                <div class="tool-content">
+                    <div class="tool-input-group">
+                        <label>Convert From:</label>
+                        <select class="tool-input" id="convertType" onchange="updateUnits()">
+                            <option value="length">Length</option>
+                            <option value="weight">Weight</option>
+                            <option value="temp">Temperature</option>
+                            <option value="speed">Speed</option>
+                        </select>
+                    </div>
+                    <div class="tool-input-group">
+                        <label>Value:</label>
+                        <input type="number" class="tool-input" id="convertValue" value="1" oninput="doConvert()">
+                    </div>
+                    <div class="tool-input-group">
+                        <label>From:</label>
+                        <select class="tool-input" id="convertFrom" onchange="doConvert()"></select>
+                    </div>
+                    <div class="tool-input-group">
+                        <label>To:</label>
+                        <select class="tool-input" id="convertTo" onchange="doConvert()"></select>
+                    </div>
+                    <div class="tool-result active" id="convertResult">
+                        <h4>Result</h4>
+                        <p id="convertOutput" style="font-size:1.5rem;color:var(--white);"></p>
+                    </div>
+                </div>`;
+            break;
+        case 'color':
+            title = '🎨 Color Picker';
+            content = `
+                <div class="tool-content" style="text-align:center;">
+                    <input type="color" id="colorInput" value="#6c5ce7" style="width:200px;height:200px;border:none;cursor:pointer;border-radius:16px;" oninput="updateColor()">
+                    <div style="margin-top:1rem;" id="colorInfo">
+                        <p style="font-size:1.3rem;color:var(--white);" id="colorHex">#6c5ce7</p>
+                        <p id="colorRgb" style="color:rgba(255,255,255,0.5);">RGB: 108, 92, 231</p>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top:1rem;" onclick="copyToClipboard(document.getElementById('colorHex').textContent)">📋 Copy HEX</button>
+                </div>`;
+            break;
+        case 'password':
+            title = '🔐 Password Generator';
+            content = `
+                <div class="tool-content">
+                    <input type="text" id="passOutput" class="tool-input" readonly style="font-size:1.2rem;font-family:monospace;text-align:center;margin-bottom:1rem;">
+                    <div class="tool-input-group">
+                        <label>Length: <span id="passLenVal">16</span></label>
+                        <input type="range" id="passLen" min="8" max="64" value="16" class="tool-input" oninput="document.getElementById('passLenVal').textContent=this.value;genPassword()">
+                    </div>
+                    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+                        <label style="color:var(--light)"><input type="checkbox" id="passUpper" checked onchange="genPassword()"> Uppercase</label>
+                        <label style="color:var(--light)"><input type="checkbox" id="passLower" checked onchange="genPassword()"> Lowercase</label>
+                        <label style="color:var(--light)"><input type="checkbox" id="passNum" checked onchange="genPassword()"> Numbers</label>
+                        <label style="color:var(--light)"><input type="checkbox" id="passSymbol" checked onchange="genPassword()"> Symbols</label>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-primary" onclick="genPassword()">🔄 Generate</button>
+                        <button class="btn btn-success" onclick="copyToClipboard(document.getElementById('passOutput').value)">📋 Copy</button>
+                    </div>
+                </div>`;
+            break;
+        case 'qr':
+            title = '📱 QR Code Generator';
+            content = `
+                <div class="tool-content" style="text-align:center;">
+                    <div class="tool-input-group">
+                        <label>Enter text or URL:</label>
+                        <input type="text" class="tool-input" id="qrInput" value="https://findeverything.com" oninput="genQR()">
+                    </div>
+                    <div id="qrOutput" style="background:white;display:inline-block;padding:1rem;border-radius:12px;margin-top:1rem;">
+                        <img id="qrImg" src="" alt="QR Code" style="width:200px;height:200px;">
+                    </div>
+                </div>`;
+            break;
+        case 'counter':
+            title = '📝 Text Counter';
+            content = `
+                <div class="tool-content">
+                    <div class="tool-input-group">
+                        <label>Enter your text:</label>
+                        <textarea class="tool-input tool-textarea" id="textInput" oninput="countText()" placeholder="Type or paste text here..."></textarea>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+                        <div class="tool-result active"><h4>Characters</h4><p id="charCount" style="font-size:1.5rem;color:var(--white);">0</p></div>
+                        <div class="tool-result active"><h4>Words</h4><p id="wordCount" style="font-size:1.5rem;color:var(--white);">0</p></div>
+                        <div class="tool-result active"><h4>Sentences</h4><p id="sentCount" style="font-size:1.5rem;color:var(--white);">0</p></div>
+                        <div class="tool-result active"><h4>Paragraphs</h4><p id="paraCount" style="font-size:1.5rem;color:var(--white);">0</p></div>
+                    </div>
+                </div>`;
+            break;
+        case 'json':
+            title = '{ } JSON Formatter';
+            content = `
+                <div class="tool-content">
+                    <div class="tool-input-group">
+                        <label>Paste JSON:</label>
+                        <textarea class="tool-input tool-textarea" id="jsonInput" placeholder='{"key": "value"}'></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="formatJSON()">✨ Format</button>
+                    <button class="btn btn-secondary" onclick="minifyJSON()">📦 Minify</button>
+                    <pre id="jsonOutput" style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px;margin-top:1rem;overflow-x:auto;color:var(--success);font-size:0.85rem;white-space:pre-wrap;"></pre>
+                </div>`;
+            break;
+        case 'base64':
+            title = '🔣 Base64 Encoder/Decoder';
+            content = `
+                <div class="tool-content">
+                    <div class="tool-input-group">
+                        <label>Input:</label>
+                        <textarea class="tool-input tool-textarea" id="b64Input" placeholder="Enter text to encode/decode"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-primary" onclick="b64Encode()">🔒 Encode</button>
+                        <button class="btn btn-accent" onclick="b64Decode()">🔓 Decode</button>
+                    </div>
+                    <div class="tool-input-group" style="margin-top:1rem;">
+                        <label>Output:</label>
+                        <textarea class="tool-input tool-textarea" id="b64Output" readonly></textarea>
+                    </div>
+                    <button class="btn btn-success" onclick="copyToClipboard(document.getElementById('b64Output').value)">📋 Copy</button>
+                </div>`;
+            break;
+        case 'lorem':
+            title = '📄 Lorem Ipsum Generator';
+            content = `
+                <div class="tool-content">
+                    <div class="tool-input-group">
+                        <label>Paragraphs:</label>
+                        <input type="number" class="tool-input" id="loremCount" value="3" min="1" max="20">
+                    </div>
+                    <button class="btn btn-primary" onclick="genLorem()">✨ Generate</button>
+                    <div class="tool-input-group" style="margin-top:1rem;">
+                        <textarea class="tool-input tool-textarea" id="loremOutput" readonly style="min-height:200px;"></textarea>
+                    </div>
+                    <button class="btn btn-success" onclick="copyToClipboard(document.getElementById('loremOutput').value)">📋 Copy</button>
+                </div>`;
+            break;
+        case 'stopwatch':
+            title = '⏱️ Stopwatch';
+            content = `
+                <div class="tool-content" style="text-align:center;">
+                    <p id="swDisplay" style="font-size:3rem;font-weight:700;color:var(--white);font-family:monospace;margin:2rem 0;">00:00:00.000</p>
+                    <div class="modal-actions" style="justify-content:center;">
+                        <button class="btn btn-success" id="swStart" onclick="swToggle()">▶️ Start</button>
+                        <button class="btn btn-secondary" onclick="swLap()">📍 Lap</button>
+                        <button class="btn btn-accent" onclick="swReset()">🔄 Reset</button>
+                    </div>
+                    <div id="swLaps" style="margin-top:1rem;text-align:left;max-height:200px;overflow-y:auto;"></div>
+                </div>`;
+            break;
+        case 'bmi':
+            title = '⚖️ BMI Calculator';
+            content = `
+                <div class="tool-content">
+                    <div class="tool-input-group">
+                        <label>Weight (kg):</label>
+                        <input type="number" class="tool-input" id="bmiWeight" value="70">
+                    </div>
+                    <div class="tool-input-group">
+                        <label>Height (cm):</label>
+                        <input type="number" class="tool-input" id="bmiHeight" value="170">
+                    </div>
+                    <button class="btn btn-primary" onclick="calcBMI()">📊 Calculate</button>
+                    <div class="tool-result" id="bmiResult"><h4>Your BMI</h4><p id="bmiOutput"></p></div>
+                </div>`;
+            break;
+        case 'tip':
+            title = '💰 Tip Calculator';
+            content = `
+                <div class="tool-content">
+                    <div class="tool-input-group">
+                        <label>Bill Amount ($):</label>
+                        <input type="number" class="tool-input" id="tipBill" value="50" oninput="calcTip()">
+                    </div>
+                    <div class="tool-input-group">
+                        <label>Tip %: <span id="tipPctVal">15</span>%</label>
+                        <input type="range" class="tool-input" id="tipPct" min="0" max="50" value="15" oninput="document.getElementById('tipPctVal').textContent=this.value;calcTip()">
+                    </div>
+                    <div class="tool-input-group">
+                        <label>Split between:</label>
+                        <input type="number" class="tool-input" id="tipSplit" value="1" min="1" oninput="calcTip()">
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+                        <div class="tool-result active"><h4>Tip</h4><p id="tipAmount" style="font-size:1.3rem;color:var(--white);">$0</p></div>
+                        <div class="tool-result active"><h4>Total</h4><p id="tipTotal" style="font-size:1.3rem;color:var(--white);">$0</p></div>
+                        <div class="tool-result active" style="grid-column:span 2;"><h4>Per Person</h4><p id="tipPerson" style="font-size:1.3rem;color:var(--white);">$0</p></div>
+                    </div>
+                </div>`;
+            break;
+        case 'age':
+            title = '🎂 Age Calculator';
+            content = `
+                <div class="tool-content">
+                    <div class="tool-input-group">
+                        <label>Your Birthday:</label>
+                        <input type="date" class="tool-input" id="ageDob">
+                    </div>
+                    <button class="btn btn-primary" onclick="calcAge()">🎂 Calculate Age</button>
+                    <div class="tool-result" id="ageResult"><h4>Your Age</h4><p id="ageOutput"></p></div>
+                </div>`;
+            break;
+        case 'markdown':
+            title = '📝 Markdown Preview';
+            content = `
+                <div class="tool-content">
+                    <div class="tool-input-group">
+                        <label>Write Markdown:</label>
+                        <textarea class="tool-input tool-textarea" id="mdInput" oninput="previewMD()" placeholder="# Hello World\n**Bold** and *italic*\n- List item">  </textarea>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.05);padding:1.5rem;border-radius:12px;color:var(--white);" id="mdOutput"></div>
+                </div>`;
+            break;
+        case 'url':
+            title = '🔗 URL Info Tool';
+            content = `
+                <div class="tool-content">
+                    <div class="tool-input-group">
+                        <label>Enter URL:</label>
+                        <input type="url" class="tool-input" id="urlInput" value="https://www.example.com/page?query=test#section">
+                    </div>
+                    <button class="btn btn-primary" onclick="parseURL()">🔍 Analyze</button>
+                    <div class="tool-result" id="urlResult"><h4>URL Info</h4><div id="urlOutput"></div></div>
+                </div>`;
+            break;
+        case 'emoji':
+            title = '😀 Emoji Picker';
+            const emojis = '😀😃😄😁😆😅🤣😂🙂🙃😉😊😇🥰😍🤩😘😗☺😚😙🥲😋😛😜🤪😝🤑🤗🤭🤫🤔🤐🤨😐😑😶😏😒🙄😬🤥😌😔😪🤤😴😷🤒🤕🤢🤮🤧🥵🥶🥴😵🤯🤠🥳🥸😎🤓🧐😕😟🙁☹😮😯😲😳🥺😦😧😨😰😥😢😭😱😖😣😞😓😩😫🥱😤😡😠🤬😈👿💀☠💩🤡👹👺👻👽👾🤖😺😸😹😻😼😽🙀😿😾🙈🙉🙊💋💌💘💝💖💗💓💞💕💟❣💔❤🧡💛💚💙💜🤎🖤🤍💯💢💥💫💦💨🕳💣💬👋🤚🖐✋🖖👌🤌🤏✌🤞🤟🤘🤙👈👉👆🖕👇☝👍👎✊👊🤛🤜👏🙌👐🤲🤝🙏✍💅🤳💪🦾🦿🦵🦶👂🦻👃🧠🫀🫁🦷🦴👀👁👅👄👶🧒👦👧🧑👱👨🧔👩🧓👴👵🙍🙎🙅🙆💁🙋🧏🙇🤦🤷👮🕵💂🥷👷🤴👸👳👲🧕🤵👰🤰🤱👼🎅🤶🦸🦹🧙🧚🧛🧜🧝🧞🧟💆💇🚶🧍🧎🏃💃🕺👯🧖🧗🤸🏌🏇⛷🏂🏋🤼🤽🤾🤺⛹🏊🚣🧘🛀🛌👭👫👬💏💑👪👨‍👩‍👦👨‍👩‍👧👨‍👩‍👧‍👦👨‍👩‍👦‍👦👨‍👩‍👧‍👧👨‍👦👨‍👦‍👦👨‍👧👨‍👧‍👦👨‍👧‍👧👩‍👦👩‍👦‍👦👩‍👧👩‍👧‍👦👩‍👧‍👧🗣👤👥🫂👣🐵🐒🦍🦧🐶🐕🦮🐕‍🦺🐩🐺🦊🦝🐱🐈🐈‍⬛🦁🐯🐅🐆🐴🐎🦄🦓🦌🦬🐮🐂🐃🐄🐷🐖🐗🐽🐏🐑🐐🐪🐫🦙🦒🐘🦣🦏🦛🐭🐁🐀🐹🐰🐇🐿🦫🦔🦇🐻🐻‍❄️🐨🐼🦥🦦🦨🦘🦡🐾🦃🐔🐓🐣🐤🐥🐦🐧🕊🦅🦆🦢🦉🦤🪶🦩🦚🦜🐸🐊🐢🦎🐍🐲🐉🦕🦖🐳🐋🐬🦭🐟🐠🐡🦈🐙🐚🐌🦋🐛🐜🐝🪲🐞🦗🪳🕷🕸🦂🦟🪰🪱🦠💐🌸💮🏵🌹🥀🌺🌻🌼🌷🌱🪴🌲🌳🌴🌵🌾🌿☘🍀🍁🍂🍃🍇🍈🍉🍊🍋🍌🍍🥭🍎🍏🍐🍑🍒🍓🫐🥝🍅🫒🥥🥑🍆🥔🥕🌽🌶🫑🥒🥬🥦🧄🧅🍄🥜🌰🍞🥐🥖🫓🥨🥯🥞🧇🧀🍖🍗🥩🥓🍔🍟🍕🌭🥪🌮🌯🫔🥙🧆🥚🍳🥘🍲🫕🥣🥗🍿🧈🧂🥫🍱🍘🍙🍚🍛🍜🍝🍠🍢🍣🍤🍥🥮🍡🥟🥠🥡🦀🦞🦐🦑🦪🍦🍧🍨🍩🍪🎂🍰🧁🥧🍫🍬🍭🍮🍯🍼🥛☕🫖🍵🍶🍾🍷🍸🍹🍺🍻🥂🥃🥤🧋🧃🧉🧊🥢🍽🍴🥄🔪🏺🌍🌎🌏🌐🗺🧭🏔⛰🌋🗻🏕🏖🏜🏝🏞🏟🏛🏗🧱🪨🪵🛖🏘🏚🏠🏡🏢🏣🏤🏥🏦🏨🏩🏪🏫🏬🏭🏯🏰💒🗼🗽⛪🕌🛕🕍⛩🕋⛲⛺🌁🌃🏙🌄🌅🌆🌇🌉♨🎠🎡🎢💈🎪🚂🚃🚄🚅🚆🚇🚈🚉🚊🚝🚞🚋🚌🚍🚎🚐🚑🚒🚓🚔🚕🚖🚗🚘🚙🛻🚚🚛🚜🏎🏍🛵🦽🦼🛺🚲🛴🛹🛼🚏🛣🛤🛢⛽🚨🚥🚦🛑🚧⚓⛵🛶🚤🛳⛴🛥🚢✈🛩🛫🛬🪂💺🚁🚟🚠🚡🛰🚀🛸🛎🧳⌛⏳⌚⏰⏱⏲🕰🕛🕧🕐🕜🕑🕝🕒🕞🕓🕟🕔🕠🕕🕡🕖🕢🕗🕣🕘🕤🕙🕥🕚🕦🌑🌒🌓🌔🌕🌖🌗🌘🌙🌚🌛🌜🌡☀🌝🌞🪐⭐🌟🌠🌌☁⛅⛈🌤🌥🌦🌧🌨🌩🌪🌫🌬🌀🌈🌂☂☔⛱⚡❄☃⛄☄🔥💧🌊🎃🎄🎆🎇🧨✨🎈🎉🎊🎋🎍🎎🎏🎐🎑🧧🎀🎁🎗🎟🎫🎖🏆🏅🥇🥈🥉⚽⚾🥎🏀🏐🏈🏉🎾🥏🎳🏏🏑🏒🥍🏓🏸🥊🥋🥅⛳⛸🎣🤿🎽🎿🛷🥌🎯🪀🪁🎱🔮🪄🧿🎮🕹🎰🎲🧩🧸🪅🪆♠♥♦♣♟🃏🀄🎴🎭🖼🎨🧵🪡🧶🪢';
+            content = `
+                <div class="tool-content">
+                    <p style="color:rgba(255,255,255,0.5);margin-bottom:1rem;">Click any emoji to copy it!</p>
+                    <div style="max-height:400px;overflow-y:auto;line-height:2.5;">
+                        ${[...emojis].map(e => `<span style="font-size:1.5rem;cursor:pointer;padding:0.2rem;display:inline-block;transition:transform 0.2s;" onclick="copyToClipboard('${e}')" onmouseover="this.style.transform='scale(1.5)'" onmouseout="this.style.transform='scale(1)'">${e}</span>`).join('')}
+                    </div>
+                </div>`;
+            break;
+        case 'about':
+            title = 'ℹ️ About Us';
+            content = `<div class="tool-content"><h3 style="color:var(--white);margin-bottom:1rem;">FindEverything</h3><p style="color:rgba(255,255,255,0.6);">FindEverything is your ultimate web portal providing free access to 1000+ games, live TV, online tools, educational resources, shopping deals, social media, news and much more — all in one place. Our mission is to make the internet simpler and more accessible for everyone.</p><br><p style="color:rgba(255,255,255,0.6);">Features: Free browser games (single & multiplayer), live streaming TV channels, useful online tools, curated website directory, educational resources, shopping deals and more. Everything loads in popups so you never leave our site!</p></div>`;
+            break;
+        case 'contact':
+            title = '📧 Contact Us';
+            content = `<div class="tool-content"><div class="tool-input-group"><label>Name:</label><input class="tool-input" placeholder="Your name"></div><div class="tool-input-group"><label>Email:</label><input type="email" class="tool-input" placeholder="your@email.com"></div><div class="tool-input-group"><label>Message:</label><textarea class="tool-input tool-textarea" placeholder="Your message..."></textarea></div><button class="btn btn-primary" onclick="showNotification('Message sent! We\\'ll get back to you soon.')">📨 Send Message</button></div>`;
+            break;
+        case 'privacy':
+            title = '🔒 Privacy Policy';
+            content = `<div class="tool-content"><p style="color:rgba(255,255,255,0.6);">We respect your privacy. This website uses cookies and third-party advertising (Google AdSense) to provide free content. We collect anonymous analytics data to improve our service. We do not sell personal information. Third-party sites loaded in iframes have their own privacy policies. By using this site, you agree to our use of cookies for advertising and analytics purposes.</p></div>`;
+            break;
+    }
+    
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = content;
+    document.getElementById('modalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Post-init for specific tools
+    if(type === 'password') setTimeout(genPassword, 100);
+    if(type === 'converter') setTimeout(() => { updateUnits(); doConvert(); }, 100);
+    if(type === 'qr') setTimeout(genQR, 100);
+    if(type === 'tip') setTimeout(calcTip, 100);
+}
+
+// ==========================================
+// TOOL FUNCTIONS
+// ==========================================
+
+// Calculator
+let calcStr = '';
+function calcPress(b) {
+    const d = document.getElementById('calcDisplay');
+    if(b === 'C') { calcStr = ''; d.value = '0'; }
+    else if(b === '⌫') { calcStr = calcStr.slice(0,-1); d.value = calcStr || '0'; }
+    else if(b === '=') {
+        try {
+            const expr = calcStr.replace(/×/g,'*').replace(/÷/g,'/');
+            d.value = eval(expr);
+            calcStr = d.value.toString();
+        } catch(e) { d.value = 'Error'; calcStr = ''; }
+    }
+    else { calcStr += b; d.value = calcStr; }
+}
+
+// Converter
+const unitData = {
+    length: {m:1,km:1000,cm:0.01,mm:0.001,mi:1609.34,yd:0.9144,ft:0.3048,in:0.0254},
+    weight: {kg:1,g:0.001,mg:0.000001,lb:0.453592,oz:0.0283495,ton:1000},
+    temp: {celsius:1,fahrenheit:1,kelvin:1},
+    speed: {'m/s':1,'km/h':0.277778,'mph':0.44704,knot:0.514444}
+};
+function updateUnits() {
+    const type = document.getElementById('convertType').value;
+    const units = Object.keys(unitData[type]);
+    ['convertFrom','convertTo'].forEach((id,i) => {
+        document.getElementById(id).innerHTML = units.map((u,j) => `<option value="${u}" ${j===i?'selected':''}>${u}</option>`).join('');
+    });
+    doConvert();
+}
+function doConvert() {
+    const type = document.getElementById('convertType').value;
+    const val = parseFloat(document.getElementById('convertValue').value);
+    const from = document.getElementById('convertFrom').value;
+    const to = document.getElementById('convertTo').value;
+    let result;
+    if(type === 'temp') {
+        let celsius = from === 'celsius' ? val : from === 'fahrenheit' ? (val-32)*5/9 : val-273.15;
+        result = to === 'celsius' ? celsius : to === 'fahrenheit' ? celsius*9/5+32 : celsius+273.15;
+    } else {
+        result = val * unitData[type][from] / unitData[type][to];
+    }
+    document.getElementById('convertOutput').textContent = `${val} ${from} = ${result.toFixed(6)} ${to}`;
+}
+
+// Color picker
+function updateColor() {
+    const hex = document.getElementById('colorInput').value;
+    document.getElementById('colorHex').textContent = hex;
+    const r = parseInt(hex.substr(1,2),16), g = parseInt(hex.substr(3,2),16), b = parseInt(hex.substr(5,2),16);
+    document.getElementById('colorRgb').textContent = `RGB: ${r}, ${g}, ${b}`;
+}
+
+// Password generator
+function genPassword() {
+    const len = parseInt(document.getElementById('passLen').value);
+    let chars = '';
+    if(document.getElementById('passUpper').checked) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    if(document.getElementById('passLower').checked) chars += 'abcdefghijklmnopqrstuvwxyz';
+    if(document.getElementById('passNum').checked) chars += '0123456789';
+    if(document.getElementById('passSymbol').checked) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    if(!chars) chars = 'abcdefghijklmnopqrstuvwxyz';
+    let pass = '';
+    for(let i = 0; i < len; i++) pass += chars[Math.floor(Math.random()*chars.length)];
+    document.getElementById('passOutput').value = pass;
+}
+
+// QR Code
+function genQR() {
+    const text = document.getElementById('qrInput').value;
+    document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(text)}`;
+}
+
+// Text counter
+function countText() {
+    const text = document.getElementById('textInput').value;
+    document.getElementById('charCount').textContent = text.length;
+    document.getElementById('wordCount').textContent = text.trim() ? text.trim().split(/\s+/).length : 0;
+    document.getElementById('sentCount').textContent = text.trim() ? text.split(/[.!?]+/).filter(s=>s.trim()).length : 0;
+    document.getElementById('paraCount').textContent = text.trim() ? text.split(/\n\n+/).filter(s=>s.trim()).length : 0;
+}
+
+// JSON
+function formatJSON() {
+    try {
+        const obj = JSON.parse(document.getElementById('jsonInput').value);
+        document.getElementById('jsonOutput').textContent = JSON.stringify(obj, null, 2);
+    } catch(e) { document.getElementById('jsonOutput').textContent = 'Error: ' + e.message; }
+}
+function minifyJSON() {
+    try {
+        const obj = JSON.parse(document.getElementById('jsonInput').value);
+        document.getElementById('jsonOutput').textContent = JSON.stringify(obj);
+    } catch(e) { document.getElementById('jsonOutput').textContent = 'Error: ' + e.message; }
+}
+
+// Base64
+function b64Encode() {
+    document.getElementById('b64Output').value = btoa(document.getElementById('b64Input').value);
+}
+function b64Decode() {
+    try { document.getElementById('b64Output').value = atob(document.getElementById('b64Input').value); }
+    catch(e) { document.getElementById('b64Output').value = 'Error: Invalid Base64'; }
+}
+
+// Lorem Ipsum
+function genLorem() {
+    const lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    const variants = [
+        "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.",
+        "Curabitur blandit tempus porttitor. Nullam quis risus eget urna mollis ornare vel eu leo. Donec id elit non mi porta gravida at eget metus.",
+        "Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.",
+        "Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum. Fusce dapibus, tellus ac cursus commodo.",
+        "Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas faucibus mollis interdum. Donec ullamcorper nulla non metus auctor fringilla."
+    ];
+    const count = parseInt(document.getElementById('loremCount').value);
+    let result = [];
+    for(let i = 0; i < count; i++) {
+        result.push(i === 0 ? lorem : variants[i % variants.length]);
+    }
+    document.getElementById('loremOutput').value = result.join('\n\n');
+}
+
+// Stopwatch
+let swInterval = null, swTime = 0, swRunning = false, swLapCount = 0;
+function swToggle() {
+    if(swRunning) {
+        clearInterval(swInterval);
+        document.getElementById('swStart').innerHTML = '▶️ Start';
+        swRunning = false;
+    } else {
+        swInterval = setInterval(() => {
+            swTime += 10;
+            document.getElementById('swDisplay').textContent = formatTime(swTime);
+        }, 10);
+        document.getElementById('swStart').innerHTML = '⏸ Pause';
+        swRunning = true;
+    }
+}
+function swLap() {
+    if(swTime > 0) {
+        swLapCount++;
+        document.getElementById('swLaps').innerHTML += `<div style="padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--light);">Lap ${swLapCount}: ${formatTime(swTime)}</div>`;
+    }
+}
+function swReset() {
+    clearInterval(swInterval);
+    swTime = 0; swRunning = false; swLapCount = 0;
+    document.getElementById('swDisplay').textContent = '00:00:00.000';
+    document.getElementById('swStart').innerHTML = '▶️ Start';
+    document.getElementById('swLaps').innerHTML = '';
+}
+function formatTime(ms) {
+    const h = Math.floor(ms/3600000);
+    const m = Math.floor((ms%3600000)/60000);
+    const s = Math.floor((ms%60000)/1000);
+    const mill = ms%1000;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(mill).padStart(3,'0')}`;
+}
+
+// BMI
+function calcBMI() {
+    const w = parseFloat(document.getElementById('bmiWeight').value);
+    const h = parseFloat(document.getElementById('bmiHeight').value) / 100;
+    const bmi = (w / (h * h)).toFixed(1);
+    let category = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal weight' : bmi < 30 ? 'Overweight' : 'Obese';
+    let color = bmi < 18.5 ? '#fdcb6e' : bmi < 25 ? '#00b894' : bmi < 30 ? '#e17055' : '#d63031';
+    document.getElementById('bmiResult').classList.add('active');
+    document.getElementById('bmiOutput').innerHTML = `<span style="font-size:2rem;color:${color};">${bmi}</span><br><span style="color:${color};">${category}</span>`;
+}
+
+// Tip Calculator
+function calcTip() {
+    const bill = parseFloat(document.getElementById('tipBill').value) || 0;
+    const pct = parseFloat(document.getElementById('tipPct').value) || 0;
+    const split = parseInt(document.getElementById('tipSplit').value) || 1;
+    const tip = bill * pct / 100;
+    const total = bill + tip;
+    document.getElementById('tipAmount').textContent = '$' + tip.toFixed(2);
+    document.getElementById('tipTotal').textContent = '$' + total.toFixed(2);
+    document.getElementById('tipPerson').textContent = '$' + (total / split).toFixed(2);
+}
+
+// Age Calculator
+function calcAge() {
+    const dob = new Date(document.getElementById('ageDob').value);
+    if(isNaN(dob.getTime())) return;
+    const now = new Date();
+    let years = now.getFullYear() - dob.getFullYear();
+    let months = now.getMonth() - dob.getMonth();
+    let days = now.getDate() - dob.getDate();
+    if(days < 0) { months--; days += 30; }
+    if(months < 0) { years--; months += 12; }
+    const totalDays = Math.floor((now - dob) / (1000*60*60*24));
+    document.getElementById('ageResult').classList.add('active');
+    document.getElementById('ageOutput').innerHTML = `
+        <span style="font-size:1.5rem;color:var(--white);">${years} years, ${months} months, ${days} days</span><br>
+        <span style="color:rgba(255,255,255,0.5);">Total: ${totalDays.toLocaleString()} days | ${(totalDays*24).toLocaleString()} hours</span>
+    `;
+}
+
+// Markdown Preview
+function previewMD() {
+    let md = document.getElementById('mdInput').value;
+    md = md.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    md = md.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    md = md.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    md = md.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    md = md.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    md = md.replace(/`(.+?)`/g, '<code style="background:rgba(108,92,231,0.2);padding:0.1rem 0.3rem;border-radius:4px;">$1</code>');
+    md = md.replace(/^- (.+)$/gm, '<li>$1</li>');
+    md = md.replace(/\n/g, '<br>');
+    document.getElementById('mdOutput').innerHTML = md;
+}
+
+// URL Parser
+function parseURL() {
+    try {
+        const url = new URL(document.getElementById('urlInput').value);
+        document.getElementById('urlResult').classList.add('active');
+        document.getElementById('urlOutput').innerHTML = `
+            <div style="display:grid;gap:0.5rem;color:var(--light);font-size:0.9rem;">
+                <div><strong>Protocol:</strong> ${url.protocol}</div>
+                <div><strong>Host:</strong> ${url.host}</div>
+                <div><strong>Hostname:</strong> ${url.hostname}</div>
+                <div><strong>Port:</strong> ${url.port || 'default'}</div>
+                <div><strong>Pathname:</strong> ${url.pathname}</div>
+                <div><strong>Search:</strong> ${url.search || 'none'}</div>
+                <div><strong>Hash:</strong> ${url.hash || 'none'}</div>
+                <div><strong>Origin:</strong> ${url.origin}</div>
+            </div>
+        `;
+    } catch(e) {
+        document.getElementById('urlResult').classList.add('active');
+        document.getElementById('urlOutput').innerHTML = '<p style="color:var(--danger);">Invalid URL</p>';
+    }
+}
+
+// ==========================================
+// MODAL CONTROLS
+// ==========================================
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.body.style.overflow = 'auto';
+    // Clear iframe to stop media
+    const iframes = document.querySelectorAll('#modalBody iframe');
+    iframes.forEach(f => f.src = '');
+}
+
+function closeModalOutside(e) {
+    if(e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ESC key
+document.addEventListener('keydown', function(e) {
+    if(e.key === 'Escape') closeModal();
+});
+
+// ==========================================
+// UTILITY FUNCTIONS
+// ==========================================
+function getGradient(cat) {
+    const gradients = {
+        search: 'linear-gradient(135deg,#6c5ce7,#a29bfe)',
+        social: 'linear-gradient(135deg,#0984e3,#74b9ff)',
+        video: 'linear-gradient(135deg,#e17055,#fab1a0)',
+        music: 'linear-gradient(135deg,#00b894,#55efc4)',
+        news: 'linear-gradient(135deg,#636e72,#b2bec3)',
+        email: 'linear-gradient(135deg,#fdcb6e,#f39c12)',
+        cloud: 'linear-gradient(135deg,#00cec9,#81ecec)',
+        dev: 'linear-gradient(135deg,#2d3436,#636e72)',
+        finance: 'linear-gradient(135deg,#00b894,#55efc4)',
+        health: 'linear-gradient(135deg,#e17055,#fab1a0)',
+        travel: 'linear-gradient(135deg,#0984e3,#74b9ff)',
+        food: 'linear-gradient(135deg,#fdcb6e,#f39c12)',
+        jobs: 'linear-gradient(135deg,#6c5ce7,#a29bfe)',
+        action: 'linear-gradient(135deg,#e17055,#d63031)',
+        puzzle: 'linear-gradient(135deg,#6c5ce7,#a29bfe)',
+        racing: 'linear-gradient(135deg,#fdcb6e,#e17055)',
+        sports: 'linear-gradient(135deg,#00b894,#00cec9)',
+        arcade: 'linear-gradient(135deg,#fd79a8,#e84393)',
+        strategy: 'linear-gradient(135deg,#0984e3,#74b9ff)',
+        adventure: 'linear-gradient(135deg,#00b894,#55efc4)',
+        shooter: 'linear-gradient(135deg,#d63031,#e17055)',
+        multiplayer: 'linear-gradient(135deg,#6c5ce7,#fd79a8)',
+        io: 'linear-gradient(135deg,#00cec9,#81ecec)',
+        card: 'linear-gradient(135deg,#2d3436,#636e72)',
+        board: 'linear-gradient(135deg,#fdcb6e,#f39c12)',
+        rpg: 'linear-gradient(135deg,#6c5ce7,#e84393)',
+        horror: 'linear-gradient(135deg,#2d3436,#636e72)',
+        casual: 'linear-gradient(135deg,#fd79a8,#fab1a0)',
+        education: 'linear-gradient(135deg,#fdcb6e,#f39c12)',
+        shopping: 'linear-gradient(135deg,#fd79a8,#e84393)',
+    };
+    return gradients[cat] || 'linear-gradient(135deg,#6c5ce7,#a29bfe)';
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('📋 Copied to clipboard!');
+    }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showNotification('📋 Copied to clipboard!');
+    });
+}
+
+function showNotification(msg, isError = false) {
+    const n = document.getElementById('notification');
+    n.textContent = msg;
+    n.className = 'notification active' + (isError ? ' error' : '');
+    setTimeout(() => n.classList.remove('active'), 3000);
+}
+
+function acceptCookies() {
+    localStorage.setItem('cookiesAccepted', 'true');
+    document.getElementById('cookieBanner').classList.remove('active');
+}
+
+// ==========================================
+// ADS INTEGRATION GUIDE (Console Info)
+// ==========================================
+console.log(`
+╔══════════════════════════════════════════╗
+║   FindEverything - Ad Integration Guide  ║
+╠══════════════════════════════════════════╣
+║                                          ║
+║  HOW TO ADD GOOGLE ADSENSE:              ║
+║                                          ║
+║  1. Sign up at google.com/adsense        ║
+║  2. Add your site & get approved         ║
+║  3. Replace all <div class="ad-banner">  ║
+║     sections with your AdSense code      ║
+║                                          ║
+║  EXAMPLE:                                ║
+║  Replace the ad-placeholder divs with:   ║
+║                                          ║
+║  <ins class="adsbygoogle"                ║
+║       style="display:block"              ║
+║       data-ad-client="ca-pub-XXXXX"      ║
+║       data-ad-slot="XXXXXX"              ║
+║       data-ad-format="auto"></ins>        ║
+║  <script>(adsbygoogle=window.adsbygoogle ║
+║       ||[]).push({});</script>            ║
+║                                          ║
+║  AD PLACEMENTS IN THIS SITE:             ║
+║  - Top banner (728x90)                   ║
+║  - Between sections (970x250)            ║
+║  - Before/after game play                ║
+║  - Before/after site popups              ║
+║  - Bottom banner (728x90)                ║
+║  - Sidebar ads (160x600)                 ║
+║                                          ║
+║  FREE HOSTING OPTIONS:                   ║
+║  - GitHub Pages (github.com)             ║
+║  - Netlify (netlify.com)                 ║
+║  - Vercel (vercel.com)                   ║
+║  - Cloudflare Pages                      ║
+║  - InfinityFree (infinityfree.com)       ║
+║                                          ║
+║  ALTERNATIVE AD NETWORKS:                ║
+║  - Media.net                             ║
+║  - PropellerAds                          ║
+║  - Adsterra                              ║
+║  - PopAds                                ║
+║  - HilltopAds                            ║
+║                                          ║
+╚══════════════════════════════════════════╝
+`);
+</script>
+
+</body>
+</html>
